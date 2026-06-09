@@ -1,0 +1,2340 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salary Decoder</title>
+  <style>
+    :root {
+      --ink: #172126;
+      --muted: #66737a;
+      --line: #d8e0e3;
+      --paper: #fbfcfb;
+      --panel: #ffffff;
+      --accent: #0f766e;
+      --accent-strong: #0b5d56;
+      --blue: #2563eb;
+      --violet: #7c3aed;
+      --gold: #d97706;
+      --warn: #a8550f;
+      --good: #17803d;
+      --soft: #e8f3f1;
+      --shadow: 0 18px 50px rgba(23, 33, 38, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 340px),
+        linear-gradient(135deg, rgba(232, 243, 241, 0.96), rgba(255, 247, 237, 0.82) 48%, rgba(251, 252, 251, 0.96) 440px),
+        var(--paper);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1160px, calc(100% - 32px));
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 0;
+      display: grid;
+      grid-template-rows: auto auto auto auto auto;
+      gap: 10px;
+      overflow: visible;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      display: grid;
+      width: 42px;
+      height: 42px;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--blue));
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.06;
+      letter-spacing: 0;
+    }
+
+    .brand p,
+    .intro p,
+    .muted {
+      color: var(--muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #111827;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 0;
+    }
+
+    .intro p {
+      max-width: 680px;
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .intro p.blink-text {
+      animation: softBlink 1.8s ease-in-out infinite;
+      color: #22c55e;
+      font-weight: 900;
+    }
+
+    @keyframes softBlink {
+      0%, 45%, 100% {
+        opacity: 1;
+      }
+
+      60%, 78% {
+        opacity: 0.12;
+      }
+    }
+
+    .hero-result {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ffffff, #ecfdf5);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-result span {
+      display: block;
+      color: #0f172a;
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.05;
+    }
+
+    .hero-result strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 22px;
+      line-height: 1.12;
+      color: var(--accent-strong);
+      animation: strongBlink 1.15s ease-in-out infinite;
+    }
+
+    @keyframes strongBlink {
+      0%, 45%, 100% {
+        opacity: 1;
+      }
+
+      60%, 78% {
+        opacity: 0.28;
+      }
+    }
+
+    .tagline {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #111827;
+      color: #ffffff;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .page-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      align-items: start;
+      height: auto;
+      min-height: 0;
+    }
+
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .page-tab {
+      min-height: 32px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 6px 11px;
+      background: #ffffff;
+      color: #374151;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .page-tab.active {
+      background: #111827;
+      border-color: #111827;
+      color: #ffffff;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 12px 36px rgba(23, 33, 38, 0.08);
+      overflow: visible;
+      height: auto;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto auto;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 14px;
+      border-bottom: 1px solid #cfd8dc;
+      background: linear-gradient(135deg, #ffffff, #eff6ff 52%, #ecfdf5);
+    }
+
+    .panel h2 {
+      font-size: 18px;
+      line-height: 1.2;
+      color: #0f172a;
+      font-weight: 900;
+    }
+
+    .panel-body {
+      padding: 12px 14px;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .upload-zone {
+      position: relative;
+      display: grid;
+      min-height: 92px;
+      place-items: center;
+      padding: 12px;
+      border: 1.5px dashed #9fb4b7;
+      border-radius: 8px;
+      background: #f7fbfa;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: #eef8f6;
+    }
+
+    .upload-zone input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .upload-zone.dragging {
+      border-color: var(--accent);
+      background: #eef8f6;
+    }
+
+    .upload-icon {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 6px;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--soft);
+      color: var(--accent-strong);
+    }
+
+    .file-name {
+      display: none;
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      color: var(--accent-strong);
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .file-name.has-file {
+      display: block;
+    }
+
+    #chooseFileBtn {
+      margin-top: 8px;
+    }
+
+    .upload-preview {
+      display: none;
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .upload-preview.show {
+      display: block;
+    }
+
+    .upload-preview img {
+      display: block;
+      width: 100%;
+      max-height: 120px;
+      object-fit: contain;
+      background: #f8faf9;
+    }
+
+    .upload-preview .pdf-preview {
+      padding: 16px;
+      color: var(--muted);
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .upload-status {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #f8faf9;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .upload-status.show {
+      display: block;
+    }
+
+    .upload-status.error {
+      border-color: #fecaca;
+      background: #fff1f2;
+      color: #9f1239;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      margin-top: 10px;
+    }
+
+    .mode-tabs {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+      padding: 4px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+
+    .mode-tab {
+      min-height: 34px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: #374151;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .mode-tab.active {
+      background: linear-gradient(135deg, #111827, #2563eb);
+      color: #ffffff;
+      border-color: #111827;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.20);
+    }
+
+    .breakup-field,
+    .ctc-only .breakup-field {
+      display: none;
+    }
+
+    label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .optional-text {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px 10px;
+      color: var(--ink);
+      background: white;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 36px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      transform: none;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #64748b, #334155);
+      color: white;
+    }
+
+    .primary.ready {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      box-shadow: 0 10px 24px rgba(22, 163, 74, 0.28);
+    }
+
+    .primary:hover {
+      background: linear-gradient(135deg, var(--accent-strong), #1d4ed8);
+    }
+
+    .primary.ready:hover {
+      background: linear-gradient(135deg, #15803d, #166534);
+    }
+
+    .secondary {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
+    .result-layout {
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .summary-row.calculated-output {
+      padding: 8px;
+      border: 1px solid #4ade80;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f0fdf4, #eff6ff);
+    }
+
+    .metric {
+      min-height: 68px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdfd;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .calculated-output .metric {
+      border-color: #bbf7d0;
+      background: #ffffff;
+    }
+
+    .calculated-output .metric span {
+      color: #166534;
+    }
+
+    .calculated-output .metric strong {
+      color: #15803d;
+    }
+
+    .metric.highlight {
+      background: linear-gradient(135deg, #dcfce7, #dbeafe);
+      border-color: #4ade80;
+    }
+
+    .metric.highlight strong {
+      color: #14532d;
+      font-size: 22px;
+    }
+
+    .breakdown {
+      display: grid;
+      gap: 7px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 2px;
+      padding: 9px 11px;
+      border-radius: 8px;
+    }
+
+    .section-title h3 {
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .section-title .muted {
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .data-grid.input-data {
+      padding: 9px;
+      border: 1px solid #111827;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+
+    .data-card {
+      min-height: 58px;
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdfd;
+    }
+
+    .input-data .data-card {
+      border-color: #d1d5db;
+      background: #ffffff;
+    }
+
+    .data-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .data-card strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 15px;
+      line-height: 1.15;
+      word-break: break-word;
+    }
+
+    .input-data .data-card span {
+      color: #111827;
+    }
+
+    .input-data .data-card strong {
+      color: #000000;
+    }
+
+    .input-title h3 {
+      color: #000000;
+    }
+
+    .input-title {
+      border: 1px solid #111827;
+      background: #111827;
+      color: #ffffff;
+    }
+
+    .input-title h3,
+    .input-title .muted {
+      color: #ffffff;
+    }
+
+    .output-title h3 {
+      color: #15803d;
+    }
+
+    .output-title {
+      border: 1px solid #16a34a;
+      background: linear-gradient(135deg, #14532d, #15803d);
+      color: #ffffff;
+    }
+
+    .output-title h3,
+    .output-title .muted {
+      color: #ffffff;
+    }
+
+    .source-note {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8faf9;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .source-note.flag {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #991b1b;
+      font-weight: 800;
+    }
+
+    .line-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #edf1f2;
+    }
+
+    .line-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .line-item.take-home-line {
+      margin-top: 4px;
+      padding: 11px 12px;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f0fdf4, #ffffff);
+    }
+
+    .line-item.take-home-line span,
+    .line-item.take-home-line strong {
+      color: #14532d;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .line-item span:first-child {
+      color: #166534;
+      font-weight: 800;
+    }
+
+    .line-item strong {
+      color: #14532d;
+      text-align: right;
+    }
+
+    .summary-table {
+      display: grid;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .summary-table .summary-row-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(120px, 0.7fr);
+      gap: 10px;
+      padding: 7px 10px;
+      border-bottom: 1px solid #dcfce7;
+      align-items: center;
+    }
+
+    .summary-table .summary-row-item:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-row-item span {
+      color: #64748b;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .summary-row-item strong {
+      color: #0f172a;
+      text-align: right;
+      font-size: 14px;
+    }
+
+    .tier-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px;
+      border-radius: 8px;
+      background: #111827;
+      border: 1px solid #111827;
+      color: #ffffff;
+    }
+
+    .tier-box strong {
+      color: #bbf7d0;
+    }
+
+    .tier-box .muted {
+      color: #d1d5db;
+    }
+
+    .tier-box h3 {
+      color: #ffffff;
+    }
+
+    .explanation {
+      min-height: 78px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f6faf9;
+      border: 1px solid var(--line);
+      color: #34444a;
+      line-height: 1.35;
+    }
+
+    .explanation:empty {
+      display: none;
+    }
+
+    .locked {
+      position: relative;
+      overflow: hidden;
+      max-height: 74px;
+    }
+
+    .locked::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.1), rgba(255,255,255,0.94) 72%);
+      pointer-events: none;
+    }
+
+    .payment-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .notice {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .toast {
+      display: none;
+      margin-top: 8px;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid #bbf7d0;
+      background: #f0fdf4;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    .upload-zone.compact {
+      min-height: 70px;
+      padding: 9px 12px;
+      text-align: left;
+    }
+
+    .upload-zone.compact > span {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px 12px;
+      width: 100%;
+    }
+
+    .upload-copy {
+      display: grid;
+      gap: 2px;
+    }
+
+    .advanced-options {
+      grid-column: 1 / -1;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+
+    .advanced-options summary,
+    .details-toggle summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 900;
+    }
+
+    .advanced-options summary::-webkit-details-marker,
+    .details-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .advanced-options summary {
+      padding: 10px 12px;
+      color: #1e3a8a;
+    }
+
+    .advanced-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      padding: 0 12px 12px;
+    }
+
+    .advanced-options:not([open]) .advanced-grid {
+      display: none;
+    }
+
+    .advanced-options[open] .advanced-grid {
+      display: grid;
+    }
+
+    .main-result {
+      display: grid;
+      gap: 6px;
+      padding: 18px;
+      border: 2px solid #22c55e;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #dcfce7, #ffffff 58%, #dbeafe);
+      text-align: center;
+    }
+
+    .main-result span {
+      color: #166534;
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .main-result strong {
+      color: #14532d;
+      font-size: clamp(52px, 9vw, 85px);
+      line-height: 0.98;
+      font-weight: 950;
+    }
+
+    .result-note {
+      color: #14532d;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .reality-check {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border: 2px solid #f97316;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #fff7ed, #ffffff);
+    }
+
+    .reality-check h3 {
+      color: #9a3412;
+      font-size: 18px;
+    }
+
+    .reality-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .reality-card {
+      padding: 10px;
+      border: 1px solid #fed7aa;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .reality-card span {
+      display: block;
+      color: #9a3412;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .reality-card strong {
+      display: block;
+      margin-top: 5px;
+      color: #7c2d12;
+      font-size: 22px;
+    }
+
+    .details-toggle {
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .details-toggle summary {
+      padding: 11px 13px;
+      color: #14532d;
+      background: #f0fdf4;
+    }
+
+    .details-body {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .unlock-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .unlock-list span,
+    .unlock-list button {
+      padding: 5px 8px;
+      border: 0;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .unlock-list button:hover {
+      background: #dbeafe;
+    }
+
+    .focus-flash {
+      outline: 2px solid #22c55e;
+      background: #f0fdf4 !important;
+      transition: background 180ms ease, outline 180ms ease;
+    }
+
+    footer {
+      color: #475569;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    footer .vipul-name {
+      color: #86efac;
+      animation: softBlink 1.8s ease-in-out infinite;
+    }
+
+    @media (max-width: 900px) {
+      .intro,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-result {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 24px, 1160px);
+        padding-top: 18px;
+      }
+
+      header,
+      .panel-head,
+      .tier-box,
+      .payment-strip {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-grid,
+      .summary-row,
+      .data-grid,
+      .advanced-grid,
+      .reality-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-pill {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand">
+        <div class="mark">SD</div>
+        <div>
+          <h2>Salary Decoder</h2>
+          <p>CTC to actual in-hand</p>
+        </div>
+      </div>
+      <div class="status-pill"><span class="dot"></span><span>Calculator ready</span></div>
+    </header>
+
+    <section class="intro">
+      <div>
+        <h1>CTC ≠ Monthly In-Hand Salary</h1>
+        <p class="blink-text">Most employees overestimate their salary by assuming CTC ÷ 12.</p>
+        <span class="tagline">CTC → In-Hand → Reality Check</span>
+      </div>
+      <div class="hero-result">
+        <span>Think your salary is CTC ÷ 12?</span>
+        <strong>You may be in for a surprise.</strong>
+      </div>
+    </section>
+
+    <div class="page-nav">
+      <button class="page-tab active" id="inputPageTab" type="button">Input</button>
+      <button class="page-tab" id="outputPageTab" type="button">Output</button>
+    </div>
+
+    <section class="page active" id="inputPage">
+      <div class="page-shell">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Salary Data</h2>
+            <p class="muted">Use annual numbers in rupees.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="upload-zone compact" id="uploadZone">
+            <input id="salaryFile" type="file" accept=".docx">
+            <span>
+              <span class="upload-icon" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 15V4m0 0 4 4m-4-4-4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="upload-copy">
+                <strong>Upload DOCX offer letter / salary breakup</strong>
+                <span class="muted">or enter details manually below.</span>
+              </span>
+              <button class="btn secondary" id="chooseFileBtn" type="button">Choose file</button>
+              <span class="file-name" id="fileName"></span>
+            </span>
+          </div>
+          <div class="upload-preview" id="uploadPreview"></div>
+          <div class="upload-status" id="uploadStatus"></div>
+
+          <div class="mode-tabs" role="tablist" aria-label="Salary input mode">
+            <button class="mode-tab active" id="detailedModeBtn" type="button">CTC plus other details available</button>
+            <button class="mode-tab" id="ctcOnlyModeBtn" type="button">Only CTC available</button>
+          </div>
+
+          <div class="form-grid" id="salaryForm">
+            <label>Annual CTC
+              <input id="ctc" type="text" inputmode="numeric" placeholder="e.g. 18,00,000">
+            </label>
+            <label class="breakup-field">HRA Monthly
+              <input id="hra" type="text" inputmode="numeric" placeholder="optional">
+            </label>
+            <label class="breakup-field">Gross Monthly
+              <input id="grossMonthlyInput" type="text" inputmode="numeric" placeholder="e.g. 1,82,400">
+            </label>
+            <label class="breakup-field">Conveyance Monthly
+              <input id="conveyance" type="text" inputmode="numeric" placeholder="optional">
+            </label>
+            <label>Employment State *
+              <select id="stateTax">
+                <option value="">Select state</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Haryana">Haryana</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="DEFAULT">Other / default</option>
+              </select>
+            </label>
+            <label>Is gratuity part of CTC? *
+                  <select id="gratuityMentioned">
+                    <option value="">Select yes or no</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </label>
+            <label>PF Basis *
+                  <select id="pfBasis">
+                    <option value="">Select PF basis</option>
+                    <option value="actual">Actual basis: 12% of Basic</option>
+                    <option value="capped">Capped: Rs 1,800 monthly</option>
+                    <option value="zero">Zero PF</option>
+                  </select>
+                </label>
+            <label>Variable Pay
+                  <select id="variablePayType">
+                    <option value="none">No variable pay</option>
+                    <option value="monthly">Monthly variable amount</option>
+                    <option value="annual">Annual variable amount</option>
+                  </select>
+                </label>
+            <details class="advanced-options">
+              <summary>Advanced Options</summary>
+              <div class="advanced-grid">
+                <label>Basic Monthly <span class="optional-text">(optional)</span>
+              <input id="basic" type="text" inputmode="numeric" placeholder="e.g. 75,000">
+            </label>
+                <label>Variable Pay Amount
+                  <input id="variable" type="text" inputmode="numeric" placeholder="optional">
+                </label>
+                <label>Employer NPS Monthly <span class="optional-text">(optional)</span>
+                  <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000">
+                </label>
+                <label>Other Tax-Free Component Monthly <span class="optional-text">(optional)</span>
+                  <input id="otherTaxFreeMonthly" type="text" inputmode="numeric" placeholder="e.g. 10,000">
+                </label>
+              </div>
+            </details>
+          </div>
+          <div class="source-note flag" id="inputErrorBox" style="display: none;"></div>
+
+          <div class="actions">
+            <button class="btn primary" id="calculateBtn" type="button">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 3h14v18H5zM8 7h8M8 11h2m4 0h2M8 15h2m4 0h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              🚀 Decode My Salary
+            </button>
+            <button class="btn secondary" id="sampleBtn" type="button">Load sample</button>
+            <button class="btn secondary" id="resetBtn" type="button">Reset</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <section class="page" id="outputPage">
+      <div class="page-shell">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Result</h2>
+            <p class="muted">Full salary view available now.</p>
+          </div>
+        </div>
+        <div class="panel-body result-layout">
+          <div class="main-result">
+            <span>Your Monthly In-Hand Salary</span>
+            <strong id="monthlyInHand">₹0</strong>
+            <p class="result-note">This is the amount likely to hit your bank account every month.</p>
+          </div>
+
+          <span id="annualInHand" style="display:none;">₹0</span>
+          <span id="taxAnnual" style="display:none;">₹0</span>
+          <span id="monthlyTax" style="display:none;">₹0</span>
+
+          <div class="reality-check">
+            <h3>CTC ÷ 12 Myth Buster</h3>
+            <div class="reality-grid">
+              <div class="reality-card"><span>What you expect</span><strong id="ctcAssumption">₹0</strong></div>
+              <div class="reality-card"><span>What you get</span><strong id="realityActual">₹0</strong></div>
+              <div class="reality-card"><span>Reality gap</span><strong id="realityDiff">₹0</strong></div>
+            </div>
+          </div>
+
+          <span id="calculatedFromLabel" style="display: none;">Using current input fields</span>
+
+          <div class="tier-box">
+            <div>
+              <p class="muted">Salary tier</p>
+              <h3 id="tierLabel">Tier2</h3>
+            </div>
+            <strong id="priceLabel">Detailed breakup included free</strong>
+          </div>
+
+          <details class="details-toggle" id="detailsToggle">
+            <summary>View detailed calculation</summary>
+            <div class="details-body">
+              <div class="section-title input-title">
+                <h3>Input Data</h3>
+                <span class="muted" id="uploadSourceLabel">Using current form values</span>
+              </div>
+              <div class="data-grid input-data">
+                <div class="data-card"><span>CTC</span><strong id="uploadedCtc">Waiting for upload</strong></div>
+                <div class="data-card"><span>Basic</span><strong id="uploadedBasic">Waiting for upload</strong></div>
+                <div class="data-card"><span>HRA</span><strong id="uploadedHra">Waiting for upload</strong></div>
+                <div class="data-card"><span>Gross Monthly</span><strong id="uploadedGrossMonthly">Waiting for upload</strong></div>
+                <div class="data-card"><span>Variable Pay</span><strong id="uploadedVariable">Waiting for upload</strong></div>
+                <div class="data-card"><span>Employer NPS Monthly</span><strong id="uploadedNpsMonthly">Not provided</strong></div>
+                <div class="data-card"><span>Other Tax-Free Monthly</span><strong id="uploadedOtherTaxFreeMonthly">Not provided</strong></div>
+                <div class="data-card"><span>Gratuity</span><strong id="uploadedGratuity">Waiting for upload</strong></div>
+                <div class="data-card"><span>PF Basis</span><strong id="uploadedPfBasis">Waiting for upload</strong></div>
+                <div class="data-card"><span>State</span><strong id="uploadedState">Waiting for upload</strong></div>
+              </div>
+              <div class="source-note" id="uploadReadNote">This section updates from whatever is typed on the left or filled by upload.</div>
+              <div class="source-note" id="basicValidationNote">Basic validation will appear here.</div>
+              <div class="source-note" id="calculationNote" style="display: none;"></div>
+              <div class="explanation" id="explanation"></div>
+              <div class="summary-table">
+              <div class="summary-row-item"><span>Annual CTC</span><strong id="summaryCtc">₹0</strong></div>
+              <div class="summary-row-item"><span>Employer PF</span><strong id="summaryEmployerPfAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Employer NPS</span><strong id="summaryEmployerNpsAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Gratuity</span><strong id="summaryGratuityAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Employer ESIC</span><strong id="summaryEmployerEsicAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Gross annual salary</span><strong id="summaryGrossAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Standard deduction</span><strong id="summaryStandardDeduction">₹75,000</strong></div>
+              <div class="summary-row-item"><span>Other tax-free deduction</span><strong id="summaryOtherTaxFreeAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Taxable income</span><strong id="summaryTaxableIncome">₹0</strong></div>
+              <div class="summary-row-item"><span>Base tax</span><strong id="summaryBaseTax">₹0</strong></div>
+              <div class="summary-row-item"><span>Cess 4%</span><strong id="summaryCess">₹0</strong></div>
+              <div class="summary-row-item"><span>Annual tax</span><strong id="summaryAnnualTax">₹0</strong></div>
+              <div class="summary-row-item"><span>Monthly tax / TDS</span><strong id="summaryMonthlyTds">₹0</strong></div>
+              </div>
+              <div class="breakdown" id="breakdown">
+                <div class="line-item"><span>Gross monthly</span><strong id="grossMonthly">₹0</strong></div>
+                <div class="line-item"><span>Employee PF monthly</span><strong id="employeePfMonthly">₹0</strong></div>
+                <div class="line-item"><span>Professional tax monthly</span><strong id="professionalTaxMonthly">₹0</strong></div>
+                <div class="line-item"><span>TDS monthly</span><strong id="tdsMonthly">₹0</strong></div>
+                <div class="line-item"><span>Employee ESIC monthly</span><strong id="esicMonthly">₹0</strong></div>
+                <div class="line-item take-home-line"><span>Monthly in-hand (take home)</span><strong id="summaryMonthlyInHand">₹0</strong></div>
+                <span id="gratuityProvision" style="display:none;">₹0</span>
+                <span id="taxableIncome" style="display:none;">₹0</span>
+              </div>
+            </div>
+          </details>
+
+          <div class="payment-strip">
+            <div>
+              <strong id="unlockText">Detailed breakup included free</strong>
+              <div class="unlock-list">
+                <button class="breakup-chip" type="button" data-focus="pf">PF breakup</button>
+                <button class="breakup-chip" type="button" data-focus="tax">Tax calculation</button>
+                <button class="breakup-chip" type="button" data-focus="gratuity">Gratuity impact</button>
+                <button class="breakup-chip" type="button" data-focus="summary">Summary</button>
+              </div>
+            </div>
+            <button class="btn secondary" id="editInputsBtn" type="button">Edit inputs</button>
+            <button class="btn primary" id="freeAccessBtn" type="button">View full breakup</button>
+          </div>
+          <div class="toast" id="toast">Full breakup is available free initially.</div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <footer>Built by <span class="vipul-name">Vipul Sharma</span> | HR &amp; Compensation Specialist</footer>
+  </main>
+
+  <script>
+    const rupee = new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0
+    });
+
+    const fields = {
+      ctc: document.getElementById("ctc"),
+      basic: document.getElementById("basic"),
+      hra: document.getElementById("hra"),
+      grossMonthlyInput: document.getElementById("grossMonthlyInput"),
+      variablePayType: document.getElementById("variablePayType"),
+      variable: document.getElementById("variable"),
+      npsMonthly: document.getElementById("npsMonthly"),
+      otherTaxFreeMonthly: document.getElementById("otherTaxFreeMonthly"),
+      conveyance: document.getElementById("conveyance"),
+      gratuityMentioned: document.getElementById("gratuityMentioned"),
+      pfBasis: document.getElementById("pfBasis"),
+      stateTax: document.getElementById("stateTax")
+    };
+
+    const output = {
+      monthlyInHand: document.getElementById("monthlyInHand"),
+      annualInHand: document.getElementById("annualInHand"),
+      taxAnnual: document.getElementById("taxAnnual"),
+      monthlyTax: document.getElementById("monthlyTax"),
+      ctcAssumption: document.getElementById("ctcAssumption"),
+      realityActual: document.getElementById("realityActual"),
+      realityDiff: document.getElementById("realityDiff"),
+      tierLabel: document.getElementById("tierLabel"),
+      priceLabel: document.getElementById("priceLabel"),
+      explanation: document.getElementById("explanation"),
+      grossMonthly: document.getElementById("grossMonthly"),
+      employeePfMonthly: document.getElementById("employeePfMonthly"),
+      professionalTaxMonthly: document.getElementById("professionalTaxMonthly"),
+      tdsMonthly: document.getElementById("tdsMonthly"),
+      esicMonthly: document.getElementById("esicMonthly"),
+      taxableIncome: document.getElementById("taxableIncome"),
+      gratuityProvision: document.getElementById("gratuityProvision"),
+      unlockText: document.getElementById("unlockText"),
+      uploadedCtc: document.getElementById("uploadedCtc"),
+      uploadedBasic: document.getElementById("uploadedBasic"),
+      uploadedHra: document.getElementById("uploadedHra"),
+      uploadedGrossMonthly: document.getElementById("uploadedGrossMonthly"),
+      uploadedVariable: document.getElementById("uploadedVariable"),
+      uploadedNpsMonthly: document.getElementById("uploadedNpsMonthly"),
+      uploadedOtherTaxFreeMonthly: document.getElementById("uploadedOtherTaxFreeMonthly"),
+      uploadedGratuity: document.getElementById("uploadedGratuity"),
+      uploadedPfBasis: document.getElementById("uploadedPfBasis"),
+      uploadedState: document.getElementById("uploadedState"),
+      uploadSourceLabel: document.getElementById("uploadSourceLabel"),
+      uploadReadNote: document.getElementById("uploadReadNote"),
+      basicValidationNote: document.getElementById("basicValidationNote"),
+      inputErrorBox: document.getElementById("inputErrorBox"),
+      calculatedFromLabel: document.getElementById("calculatedFromLabel"),
+      calculationNote: document.getElementById("calculationNote"),
+      summaryCtc: document.getElementById("summaryCtc"),
+      summaryEmployerPfAnnual: document.getElementById("summaryEmployerPfAnnual"),
+      summaryEmployerNpsAnnual: document.getElementById("summaryEmployerNpsAnnual"),
+      employerNpsMonthlyOutput: document.getElementById("employerNpsMonthlyOutput"),
+      summaryGratuityAnnual: document.getElementById("summaryGratuityAnnual"),
+      summaryEmployerEsicAnnual: document.getElementById("summaryEmployerEsicAnnual"),
+      summaryGrossAnnual: document.getElementById("summaryGrossAnnual"),
+      summaryStandardDeduction: document.getElementById("summaryStandardDeduction"),
+      summaryOtherTaxFreeAnnual: document.getElementById("summaryOtherTaxFreeAnnual"),
+      summaryTaxableIncome: document.getElementById("summaryTaxableIncome"),
+      summaryBaseTax: document.getElementById("summaryBaseTax"),
+      summaryCess: document.getElementById("summaryCess"),
+      summaryAnnualTax: document.getElementById("summaryAnnualTax"),
+      summaryMonthlyTds: document.getElementById("summaryMonthlyTds"),
+      summaryMonthlyInHand: document.getElementById("summaryMonthlyInHand")
+    };
+
+    const sampleBtn = document.getElementById("sampleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const calculateBtn = document.getElementById("calculateBtn");
+    const salaryForm = document.getElementById("salaryForm");
+    const detailedModeBtn = document.getElementById("detailedModeBtn");
+    const ctcOnlyModeBtn = document.getElementById("ctcOnlyModeBtn");
+    const inputPage = document.getElementById("inputPage");
+    const outputPage = document.getElementById("outputPage");
+    const inputPageTab = document.getElementById("inputPageTab");
+    const outputPageTab = document.getElementById("outputPageTab");
+    const editInputsBtn = document.getElementById("editInputsBtn");
+    const advancedOptions = document.querySelector(".advanced-options");
+
+    let lastUploadRead = null;
+    let inputMode = "detailed";
+    let hasTriedCalculate = false;
+
+    function missingCompulsoryInputs() {
+      const missing = [];
+
+      if (readNumber(fields.ctc) === 0) missing.push("Annual CTC");
+      if (!fields.stateTax.value) missing.push("Employment State");
+      if (!fields.gratuityMentioned.value) missing.push("Gratuity yes/no");
+      if (!fields.pfBasis.value) missing.push("PF Basis");
+
+      return missing;
+    }
+
+    function updateCalculateButtonState() {
+      const missing = missingCompulsoryInputs();
+      const isReady = missing.length === 0;
+
+      calculateBtn.classList.toggle("ready", isReady);
+      calculateBtn.title = isReady
+        ? "Ready to calculate"
+        : `Missing: ${missing.join(", ")}`;
+    }
+
+    function revealMissingInputs() {
+      output.inputErrorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function showPage(pageName) {
+      const isInput = pageName === "input";
+      inputPage.classList.toggle("active", isInput);
+      outputPage.classList.toggle("active", !isInput);
+      inputPageTab.classList.toggle("active", isInput);
+      outputPageTab.classList.toggle("active", !isInput);
+      window.location.hash = isInput ? "input" : "output";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function roundRupee(value) {
+      return Math.round(Number.isFinite(value) ? value : 0);
+    }
+
+    function money(value) {
+      return rupee.format(roundRupee(value));
+    }
+
+    function readNumber(input) {
+      return Math.max(0, Number(String(input.value || 0).replace(/[^\d.]/g, "")));
+    }
+
+    function plainIndianNumber(value) {
+      return new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: 0
+      }).format(roundRupee(value));
+    }
+
+    function employeePfForBasis(basic, basis) {
+      if (!basis) return 0;
+      if (basis === "zero") return 0;
+      if (basis === "capped") return 1800;
+      return basic * 0.12;
+    }
+
+    function pfBasisLabel(basis) {
+      if (!basis) return "Not selected";
+      if (basis === "zero") return "Zero PF";
+      if (basis === "capped") return "Capped at Rs 1,800";
+      return "Actual: 12% of Basic";
+    }
+
+    function variableMonthlyFromInput() {
+      return 0;
+    }
+
+    function variablePayLabel(monthlyValue) {
+      return fields.variablePayType.value === "none" ? "No variable pay" : "Ignored for now";
+    }
+
+    function estimatedFromCtc(ctc, pfBasis = "", gratuityIncluded = "", employerNpsMonthly = 0) {
+      const basic = ctc * 0.5 / 12;
+      const hra = basic * 0.5;
+      const employerPfMonthly = employeePfForBasis(basic, pfBasis);
+      const employerPfAnnual = employerPfMonthly * 12;
+      const gratuityAnnual = gratuityIncluded === "true" ? basic * 12 * 0.0481 : 0;
+      const employerNpsAnnual = employerNpsMonthly * 12;
+      const annualGross = Math.max(0, ctc - employerPfAnnual - employerNpsAnnual - gratuityAnnual);
+      const grossMonthly = annualGross / 12;
+
+      return {
+        ctc,
+        basic,
+        hra,
+        grossMonthly,
+        employerPfAnnual,
+        gratuityAnnual,
+        employerNpsAnnual,
+        annualGross,
+        variable: 0,
+        conveyance: 0
+      };
+    }
+
+    function setInputMode(mode) {
+      inputMode = mode;
+      salaryForm.classList.toggle("ctc-only", mode === "ctcOnly");
+      detailedModeBtn.classList.toggle("active", mode === "detailed");
+      ctcOnlyModeBtn.classList.toggle("active", mode === "ctcOnly");
+      calculate();
+    }
+
+    function uploadedMoney(value) {
+      return value > 0 ? money(value) : "Not found in document";
+    }
+
+    function inputMoney(value) {
+      return value > 0 ? money(value) : "Not provided";
+    }
+
+    function renderCurrentInputData(values) {
+      const { ctc, basic, hra, variable, grossMonthly, npsMonthly, otherTaxFreeMonthly } = values;
+      const gratuityText = fields.gratuityMentioned.value === "true"
+        ? "Yes, 4.81% of Basic"
+        : fields.gratuityMentioned.value === "false" ? "No" : "Not selected";
+
+      output.uploadedCtc.textContent = inputMoney(ctc);
+      output.uploadedBasic.textContent = inputMoney(basic);
+      output.uploadedHra.textContent = inputMoney(hra);
+      output.uploadedGrossMonthly.textContent = inputMoney(grossMonthly);
+      output.uploadedVariable.textContent = variablePayLabel(variable);
+      output.uploadedNpsMonthly.textContent = inputMoney(npsMonthly);
+      output.uploadedOtherTaxFreeMonthly.textContent = inputMoney(otherTaxFreeMonthly);
+      output.uploadedGratuity.textContent = gratuityText;
+      output.uploadedPfBasis.textContent = pfBasisLabel(fields.pfBasis.value);
+      output.uploadedState.textContent = fields.stateTax.value === "DEFAULT" ? "Other / default" : fields.stateTax.value;
+      output.uploadSourceLabel.textContent = inputMode === "ctcOnly"
+        ? "Estimated from CTC"
+        : lastUploadRead ? "Upload filled, user-editable" : "Using current form values";
+      output.uploadReadNote.textContent = lastUploadRead
+        ? "Upload filled these fields, and any edits you make on the left update this section live."
+        : "This section updates from the compulsory questions entered on the left.";
+    }
+
+    function getInputFlags(grossMonthly, basicForCalculation, ctcForCalculation) {
+      const flags = [];
+      const missing = missingCompulsoryInputs();
+
+      if (missing.length > 0) flags.push(`Please fill: ${missing.join(", ")}.`);
+      const annualBasic = basicForCalculation * 12;
+      if (fields.stateTax.value === "DEFAULT") flags.push("Other/default state selected, so default PT is being used.");
+
+      return flags;
+    }
+
+    function showInputErrors(flags) {
+      const blockingFlags = flags.filter((flag) =>
+        flag.includes("missing") ||
+        flag.includes("Please fill") ||
+        flag.includes("Please answer") ||
+        flag.includes("Please select") ||
+        flag.includes("Open Advanced Options")
+      );
+
+      if (blockingFlags.length === 0) {
+        output.inputErrorBox.style.display = "none";
+        output.inputErrorBox.textContent = "";
+        return false;
+      }
+
+      output.inputErrorBox.style.display = "block";
+      output.inputErrorBox.textContent = blockingFlags.join(" ");
+      return true;
+    }
+
+    function renderUploadedInfo(fieldsFromUpload, fileNameText = "") {
+      lastUploadRead = fieldsFromUpload;
+      output.uploadSourceLabel.textContent = fileNameText ? `Read from ${fileNameText}` : "Read from upload";
+      output.uploadReadNote.textContent = "These are the values read from the uploaded document. The calculated section below uses the editable fields on the left.";
+      output.calculatedFromLabel.textContent = "Calculated from current fields";
+    }
+
+    function resetUploadedInfo(message = "Enter values manually or upload a text-based DOCX to fill them.") {
+      lastUploadRead = null;
+      output.uploadedCtc.textContent = "Waiting for upload";
+      output.uploadedBasic.textContent = "Waiting for upload";
+      output.uploadedHra.textContent = "Waiting for upload";
+      output.uploadedGrossMonthly.textContent = "Waiting for upload";
+      output.uploadedVariable.textContent = "Waiting for upload";
+      output.uploadedNpsMonthly.textContent = "Not provided";
+      output.uploadedOtherTaxFreeMonthly.textContent = "Not provided";
+      output.uploadedGratuity.textContent = "Waiting for upload";
+      output.uploadedPfBasis.textContent = "Waiting for input";
+      output.uploadedState.textContent = "Waiting for upload";
+      output.uploadSourceLabel.textContent = "Using current form values";
+      output.uploadReadNote.textContent = message;
+      output.calculatedFromLabel.textContent = "Using current input fields";
+    }
+
+    function resetCalculator() {
+      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+        field.value = "";
+      });
+
+      fields.gratuityMentioned.value = "";
+      fields.pfBasis.value = "";
+      fields.stateTax.value = "";
+      fields.variablePayType.value = "none";
+      salaryFile.value = "";
+      fileName.textContent = "";
+      uploadPreview.innerHTML = "";
+      uploadPreview.classList.remove("show");
+      uploadStatus.textContent = "";
+      uploadStatus.classList.remove("show", "error");
+      output.inputErrorBox.style.display = "none";
+      output.inputErrorBox.textContent = "";
+      sampleBtn.disabled = false;
+      sampleBtn.textContent = "Load sample";
+      hasTriedCalculate = false;
+      setInputMode("detailed");
+      resetUploadedInfo("Enter values manually or upload a text-based DOCX to fill them.");
+      document.getElementById("breakdown").classList.remove("locked");
+      const resetDetailsToggle = document.getElementById("detailsToggle");
+      if (resetDetailsToggle) resetDetailsToggle.open = false;
+      document.getElementById("toast").classList.remove("show");
+      calculate();
+      showPage("input");
+    }
+
+    function formatInput(input) {
+      if (!String(input.value || "").trim()) {
+        input.value = "";
+        return;
+      }
+
+      input.value = plainIndianNumber(readNumber(input));
+    }
+
+    function slabTax(income) {
+      const taxable = Math.max(0, income);
+
+      if (taxable <= 1200000) return 0;
+      if (taxable <= 1600000) return 60000 + (taxable - 1200000) * 0.15;
+      if (taxable <= 2000000) return 120000 + (taxable - 1600000) * 0.20;
+      if (taxable <= 2400000) return 200000 + (taxable - 2000000) * 0.25;
+      return 300000 + (taxable - 2400000) * 0.30;
+    }
+
+    function professionalTaxForState(state, grossMonthly) {
+      if (!state) return 0;
+
+      const fixedRules = {
+        Delhi: 0,
+        Maharashtra: 200,
+        "Tamil Nadu": 100,
+        Gujarat: 200,
+        Haryana: 0,
+        "West Bengal": 100,
+        "Uttar Pradesh": 0,
+        Punjab: 200,
+        Rajasthan: 200,
+        DEFAULT: 200
+      };
+
+      if (state === "Telangana" || state === "Andhra Pradesh") return 0;
+      if (state === "Karnataka") return grossMonthly < 15000 ? 0 : 100;
+      return fixedRules[state] ?? fixedRules.DEFAULT;
+    }
+
+    function professionalTaxNote(state, professionalTaxMonthly) {
+      if (!state) {
+        return "PT not calculated until state is selected.";
+      }
+
+      if (professionalTaxMonthly === 0) {
+        return `${state} PT: not applicable / zero.`;
+      }
+
+      if (state === "Karnataka") {
+        return `Karnataka PT: ${money(professionalTaxMonthly)} monthly based on gross monthly salary.`;
+      }
+
+      return `${state} PT: ${money(professionalTaxMonthly)} monthly.`;
+    }
+
+    function setPendingCalculation(message) {
+      output.monthlyInHand.textContent = "₹0";
+      output.annualInHand.textContent = "₹0";
+      output.taxAnnual.textContent = "₹0";
+      output.monthlyTax.textContent = "₹0";
+      output.ctcAssumption.textContent = "₹0";
+      output.realityActual.textContent = "₹0";
+      output.realityDiff.textContent = "₹0";
+      output.tierLabel.textContent = "Pending";
+      output.priceLabel.textContent = "Detailed breakup included free";
+      output.grossMonthly.textContent = "₹0";
+      output.employeePfMonthly.textContent = "₹0";
+      output.professionalTaxMonthly.textContent = "₹0";
+      output.tdsMonthly.textContent = "₹0";
+      output.esicMonthly.textContent = "₹0";
+      output.taxableIncome.textContent = "₹0";
+      output.gratuityProvision.textContent = "₹0";
+      output.unlockText.textContent = "Detailed breakup included free";
+      output.explanation.textContent = "";
+      output.calculationNote.textContent = "";
+      output.summaryCtc.textContent = "₹0";
+      output.summaryEmployerPfAnnual.textContent = "₹0";
+      if (output.summaryEmployerNpsAnnual) output.summaryEmployerNpsAnnual.textContent = "₹0";
+      if (output.employerNpsMonthlyOutput) output.employerNpsMonthlyOutput.textContent = "₹0";
+      output.summaryGratuityAnnual.textContent = "₹0";
+      if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = "₹0";
+      output.summaryGrossAnnual.textContent = "₹0";
+      output.summaryStandardDeduction.textContent = money(75000);
+      output.summaryOtherTaxFreeAnnual.textContent = "₹0";
+      output.summaryTaxableIncome.textContent = "₹0";
+      output.summaryBaseTax.textContent = "₹0";
+      output.summaryCess.textContent = "₹0";
+      output.summaryAnnualTax.textContent = "₹0";
+      output.summaryMonthlyTds.textContent = "₹0";
+      output.summaryMonthlyInHand.textContent = "₹0";
+    }
+
+    function calculate(showErrors = hasTriedCalculate) {
+      updateCalculateButtonState();
+      const ctc = readNumber(fields.ctc);
+      const variableMonthlyInput = variableMonthlyFromInput();
+      const employerNpsMonthly = readNumber(fields.npsMonthly);
+      const otherTaxFreeMonthly = readNumber(fields.otherTaxFreeMonthly);
+      const onlyCtcSalaryProvided = ctc > 0 &&
+        readNumber(fields.basic) === 0 &&
+        readNumber(fields.hra) === 0 &&
+        readNumber(fields.grossMonthlyInput) === 0 &&
+        employerNpsMonthly === 0 &&
+        readNumber(fields.conveyance) === 0;
+
+      if (inputMode === "detailed" && onlyCtcSalaryProvided) {
+        inputMode = "ctcOnly";
+        salaryForm.classList.add("ctc-only");
+        detailedModeBtn.classList.remove("active");
+        ctcOnlyModeBtn.classList.add("active");
+      }
+
+      const estimate = estimatedFromCtc(ctc, fields.pfBasis.value, fields.gratuityMentioned.value, employerNpsMonthly);
+      const basic = readNumber(fields.basic) || estimate.basic;
+      const hra = readNumber(fields.hra) || estimate.hra;
+      const conveyance = readNumber(fields.conveyance) || estimate.conveyance;
+      const variable = variableMonthlyInput;
+      const statedGrossMonthly = readNumber(fields.grossMonthlyInput) || estimate.grossMonthly;
+      const grossMonthly = statedGrossMonthly || (basic + hra + conveyance + variable);
+      renderCurrentInputData({ ctc, basic, hra, variable, grossMonthly, npsMonthly: employerNpsMonthly, otherTaxFreeMonthly });
+      const inputFlags = getInputFlags(grossMonthly, basic, ctc);
+      const hasBlockingFlags = showErrors ? showInputErrors(inputFlags) : inputFlags.some((flag) =>
+        flag.includes("missing") ||
+        flag.includes("Please fill") ||
+        flag.includes("Please answer") ||
+        flag.includes("Please select") ||
+        flag.includes("Open Advanced Options")
+      );
+
+      if (!showErrors) {
+        output.inputErrorBox.style.display = "none";
+        output.inputErrorBox.textContent = "";
+      }
+      const annualBasic = basic * 12;
+      const basicThreshold = ctc * 0.5;
+      const basicPasses = ctc > 0 && annualBasic >= basicThreshold;
+      const userEnteredBasic = readNumber(fields.basic) > 0;
+
+      if (userEnteredBasic) {
+        output.basicValidationNote.classList.toggle("flag", !basicPasses);
+        output.basicValidationNote.textContent = basicPasses
+          ? "Basic check passed."
+          : `Flag: entered Basic ${money(annualBasic)} should be at least 50% of CTC (${money(basicThreshold)}). Verify Basic monthly or CTC.`;
+      } else {
+        output.basicValidationNote.classList.remove("flag");
+        output.basicValidationNote.textContent = `Basic not entered, so it is assumed at 50% of CTC (${money(annualBasic)} annual).`;
+      }
+
+      output.uploadReadNote.classList.toggle("flag", inputFlags.length > 0);
+      if (inputFlags.length > 0) {
+        output.uploadReadNote.textContent = inputFlags.join(" ");
+      }
+
+      if (hasBlockingFlags) {
+        setPendingCalculation("Complete Annual CTC, gratuity yes/no, PF basis, and employment state to see the estimate.");
+        return;
+      }
+
+      const employeePfMonthly = employeePfForBasis(basic, fields.pfBasis.value);
+      const employeePfAnnual = employeePfMonthly * 12;
+      const gratuityPercent = 4.81;
+      const gratuityRate = gratuityPercent / 100;
+      const gratuityProvision = fields.gratuityMentioned.value === "true" ? basic * 12 * gratuityRate : 0;
+      const employerNpsAnnual = employerNpsMonthly * 12;
+      const userEnteredGrossMonthly = readNumber(fields.grossMonthlyInput) > 0;
+      const fixedCtcDeductionsAnnual = employeePfAnnual + employerNpsAnnual + gratuityProvision;
+      let annualGross;
+      let employerEsicMonthly = 0;
+
+      if (userEnteredGrossMonthly) {
+        annualGross = readNumber(fields.grossMonthlyInput) * 12;
+        const enteredGrossMonthly = annualGross / 12;
+        employerEsicMonthly = enteredGrossMonthly < 21000 ? enteredGrossMonthly * 0.0325 : 0;
+      } else {
+        const grossBeforeEmployerEsicAnnual = Math.max(0, ctc - fixedCtcDeductionsAnnual);
+        const grossBeforeEmployerEsicMonthly = grossBeforeEmployerEsicAnnual / 12;
+
+        if (grossBeforeEmployerEsicMonthly < 21000) {
+          annualGross = grossBeforeEmployerEsicAnnual / 1.0325;
+          employerEsicMonthly = (annualGross / 12) * 0.0325;
+        } else {
+          annualGross = grossBeforeEmployerEsicAnnual;
+          employerEsicMonthly = 0;
+        }
+      }
+
+      const grossMonthlyForCalc = annualGross / 12;
+      const employerEsicAnnual = employerEsicMonthly * 12;
+      const professionalTaxMonthly = professionalTaxForState(fields.stateTax.value, grossMonthlyForCalc);
+      const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
+      const taxableIncome = Math.max(0, annualGross - 75000 - otherTaxFreeAnnual);
+      const taxBeforeRebate = slabTax(taxableIncome);
+      const rebate = 0;
+      const taxAfterRebate = Math.max(0, taxBeforeRebate - rebate);
+      const cess = taxAfterRebate * 0.04;
+      const taxAnnual = taxAfterRebate + cess;
+      const tdsMonthly = taxAnnual / 12;
+      const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
+      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
+      const annualInHand = monthlyInHand * 12;
+      const ctcMonthlyAssumption = ctc / 12;
+      const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
+      const tier = ctc < 1275000 ? "Tier 1" : "Tier 2";
+      const price = tier === "Tier 1" ? 49 : 99;
+
+      output.monthlyInHand.textContent = money(monthlyInHand);
+      output.annualInHand.textContent = money(annualInHand);
+      output.taxAnnual.textContent = money(taxAnnual);
+      output.monthlyTax.textContent = money(tdsMonthly);
+      output.ctcAssumption.textContent = money(ctcMonthlyAssumption);
+      output.realityActual.textContent = money(monthlyInHand);
+      output.realityDiff.textContent = money(monthlyDifference);
+      output.tierLabel.textContent = tier;
+      output.priceLabel.textContent = "Detailed breakup included free";
+      output.grossMonthly.textContent = money(grossMonthlyForCalc);
+      output.employeePfMonthly.textContent = money(employeePfMonthly);
+      if (output.employerNpsMonthlyOutput) output.employerNpsMonthlyOutput.textContent = money(employerNpsMonthly);
+      output.professionalTaxMonthly.textContent = money(professionalTaxMonthly);
+      output.tdsMonthly.textContent = money(tdsMonthly);
+      output.esicMonthly.textContent = money(esicMonthly);
+      output.taxableIncome.textContent = money(taxableIncome);
+      output.gratuityProvision.textContent = money(gratuityProvision);
+      output.unlockText.textContent = "Detailed breakup included free";
+      output.explanation.textContent = "";
+      output.calculationNote.textContent = "";
+      renderCurrentInputData({ ctc, basic, hra, variable, grossMonthly: grossMonthlyForCalc, npsMonthly: employerNpsMonthly, otherTaxFreeMonthly });
+      output.summaryCtc.textContent = money(ctc);
+      output.summaryEmployerPfAnnual.textContent = money(employeePfAnnual);
+      if (output.summaryEmployerNpsAnnual) output.summaryEmployerNpsAnnual.textContent = money(employerNpsAnnual);
+      output.summaryGratuityAnnual.textContent = money(gratuityProvision);
+      if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
+      output.summaryGrossAnnual.textContent = money(annualGross);
+      output.summaryStandardDeduction.textContent = money(75000);
+      output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
+      output.summaryTaxableIncome.textContent = money(taxableIncome);
+      output.summaryBaseTax.textContent = money(taxBeforeRebate);
+      output.summaryCess.textContent = money(cess);
+      output.summaryAnnualTax.textContent = money(taxAnnual);
+      output.summaryMonthlyTds.textContent = money(tdsMonthly);
+      output.summaryMonthlyInHand.textContent = money(monthlyInHand);
+    }
+
+    document.getElementById("calculateBtn").addEventListener("click", () => {
+      hasTriedCalculate = true;
+      calculate(true);
+      if (output.inputErrorBox.style.display !== "none") {
+        showPage("input");
+        revealMissingInputs();
+        return;
+      }
+      showPage("output");
+    });
+    inputPageTab.addEventListener("click", () => showPage("input"));
+    outputPageTab.addEventListener("click", () => {
+      hasTriedCalculate = true;
+      calculate(true);
+      if (output.inputErrorBox.style.display !== "none") {
+        showPage("input");
+        revealMissingInputs();
+        return;
+      }
+      showPage("output");
+    });
+    editInputsBtn.addEventListener("click", () => showPage("input"));
+    detailedModeBtn.addEventListener("click", () => setInputMode("detailed"));
+    ctcOnlyModeBtn.addEventListener("click", () => setInputMode("ctcOnly"));
+    resetBtn.addEventListener("click", resetCalculator);
+
+    sampleBtn.addEventListener("click", () => {
+      if (sampleBtn.disabled) {
+        return;
+      }
+
+      setInputMode("detailed");
+      fields.ctc.value = 1800000;
+      fields.basic.value = 75000;
+      fields.hra.value = 37500;
+      fields.grossMonthlyInput.value = "";
+      fields.variablePayType.value = "monthly";
+      fields.variable.value = 30000;
+      fields.npsMonthly.value = "";
+      fields.otherTaxFreeMonthly.value = "";
+      fields.conveyance.value = 2400;
+      fields.gratuityMentioned.value = "true";
+      fields.pfBasis.value = "actual";
+      fields.stateTax.value = "Karnataka";
+      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach(formatInput);
+      calculate();
+    });
+
+    const salaryFile = document.getElementById("salaryFile");
+    const uploadZone = document.getElementById("uploadZone");
+    const uploadPreview = document.getElementById("uploadPreview");
+    const uploadStatus = document.getElementById("uploadStatus");
+    const fileName = document.getElementById("fileName");
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ];
+    const allowedExtensions = [".docx"];
+
+    function setUploadStatus(message, isError = false) {
+      uploadStatus.textContent = message;
+      uploadStatus.classList.add("show");
+      uploadStatus.classList.toggle("error", isError);
+    }
+
+    function clearUploadPreview() {
+      uploadPreview.innerHTML = "";
+      uploadPreview.classList.remove("show");
+      fileName.textContent = "";
+      fileName.classList.remove("has-file");
+    }
+
+    function amountFromMatch(value, unit) {
+      const amount = Number(String(value || "0").replace(/,/g, ""));
+      const normalizedUnit = String(unit || "").toLowerCase();
+
+      if (normalizedUnit.includes("lpa") || normalizedUnit.includes("lac") || normalizedUnit.includes("lakh")) {
+        return amount * 100000;
+      }
+
+      if (normalizedUnit.includes("cr") || normalizedUnit.includes("crore")) {
+        return amount * 10000000;
+      }
+
+      return amount;
+    }
+
+    function findSalaryAmount(text, labels) {
+      const amountPattern = "(?:rs\\.?|inr|₹)?\\s*([0-9][0-9,]*(?:\\.\\d+)?)\\s*(lpa|lac|lakh|lakhs|cr|crore)?";
+
+      for (const label of labels) {
+        const pattern = new RegExp(`${label}[^0-9₹]{0,80}${amountPattern}`, "i");
+        const match = text.match(pattern);
+
+        if (match) {
+          return roundRupee(amountFromMatch(match[1], match[2]));
+        }
+      }
+
+      return 0;
+    }
+
+    function findPercentage(text, labels) {
+      for (const label of labels) {
+        const match = text.match(new RegExp(`${label}[^0-9]{0,80}([0-9]+(?:\\.\\d+)?)\\s*%`, "i"));
+        if (match) {
+          return Number(match[1]);
+        }
+      }
+
+      return 0;
+    }
+
+    function extractSalaryFields(text) {
+      const cleanText = text.replace(/\s+/g, " ");
+
+      return {
+        ctc: findSalaryAmount(cleanText, ["\\bctc\\b", "cost\\s+to\\s+company", "total\\s+compensation"]),
+        basic: findSalaryAmount(cleanText, ["\\bbasic\\b", "basic\\s+salary", "basic\\s+pay"]),
+        hra: findSalaryAmount(cleanText, ["\\bhra\\b", "house\\s+rent\\s+allowance"]),
+        grossMonthly: findSalaryAmount(cleanText, ["gross\\s+monthly", "monthly\\s+earnings", "total\\s+monthly\\s+earnings"]),
+        da: findSalaryAmount(cleanText, ["\\bda\\b", "dearness\\s+allowance"]),
+        conveyance: findSalaryAmount(cleanText, ["conveyance", "conveyance\\s+allowance"]),
+        variable: findSalaryAmount(cleanText, ["variable\\s+pay", "performance\\s+bonus", "bonus"]),
+        employerPf: findSalaryAmount(cleanText, ["employer\\s+pf", "employer\\s+provident\\s+fund", "company\\s+pf"]),
+        gratuityMentioned: /gratuity/i.test(cleanText),
+        state: (cleanText.match(/\\b(Karnataka|Delhi|Maharashtra|Tamil Nadu|Gujarat|Telangana|Haryana|West Bengal|Uttar Pradesh|Punjab|Rajasthan|Andhra Pradesh|Bangalore)\\b/i) || [])[1]
+      };
+    }
+
+    async function inflateZipEntry(bytes) {
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+
+    async function readDocxText(file) {
+      if (!("DecompressionStream" in window)) {
+        throw new Error("Your browser cannot unpack Word documents here. Please enter the values manually.");
+      }
+
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const view = new DataView(bytes.buffer);
+      let endOffset = -1;
+
+      for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 66000); i--) {
+        if (view.getUint32(i, true) === 0x06054b50) {
+          endOffset = i;
+          break;
+        }
+      }
+
+      if (endOffset === -1) {
+        throw new Error("Could not read this Word document. Please try a .docx file or enter the values manually.");
+      }
+
+      const entries = view.getUint16(endOffset + 10, true);
+      let centralOffset = view.getUint32(endOffset + 16, true);
+      const decoder = new TextDecoder("utf-8");
+
+      for (let entryIndex = 0; entryIndex < entries; entryIndex++) {
+        if (view.getUint32(centralOffset, true) !== 0x02014b50) {
+          break;
+        }
+
+        const method = view.getUint16(centralOffset + 10, true);
+        const compressedSize = view.getUint32(centralOffset + 20, true);
+        const fileNameLength = view.getUint16(centralOffset + 28, true);
+        const extraLength = view.getUint16(centralOffset + 30, true);
+        const commentLength = view.getUint16(centralOffset + 32, true);
+        const localHeaderOffset = view.getUint32(centralOffset + 42, true);
+        const entryName = decoder.decode(bytes.slice(centralOffset + 46, centralOffset + 46 + fileNameLength));
+
+        if (entryName === "word/document.xml") {
+          const localNameLength = view.getUint16(localHeaderOffset + 26, true);
+          const localExtraLength = view.getUint16(localHeaderOffset + 28, true);
+          const dataStart = localHeaderOffset + 30 + localNameLength + localExtraLength;
+          const compressed = bytes.slice(dataStart, dataStart + compressedSize);
+          const documentBytes = method === 0 ? compressed : await inflateZipEntry(compressed);
+          const xml = decoder.decode(documentBytes);
+          const doc = new DOMParser().parseFromString(xml, "application/xml");
+          const textNodes = Array.from(doc.getElementsByTagName("w:t"));
+          return textNodes.map((node) => node.textContent).join(" ");
+        }
+
+        centralOffset += 46 + fileNameLength + extraLength + commentLength;
+      }
+
+      throw new Error("Could not find readable document text inside this Word file.");
+    }
+
+    function applyExtractedFields(extracted, sourceFileName = "") {
+      setInputMode("detailed");
+      const mapping = [
+        ["ctc", fields.ctc],
+        ["basic", fields.basic],
+        ["hra", fields.hra],
+        ["grossMonthly", fields.grossMonthlyInput],
+        ["variable", fields.variable],
+        ["conveyance", fields.conveyance]
+      ];
+      let appliedCount = 0;
+
+      renderUploadedInfo(extracted, sourceFileName);
+
+      mapping.forEach(([key, input]) => {
+        if (input && extracted[key] > 0) {
+          input.value = plainIndianNumber(extracted[key]);
+          appliedCount++;
+        }
+      });
+
+      if (typeof extracted.gratuityMentioned === "boolean") {
+        fields.gratuityMentioned.value = extracted.gratuityMentioned ? "true" : "false";
+      }
+
+      if (extracted.variable > 0) {
+        fields.variablePayType.value = "monthly";
+      }
+
+      if (extracted.state) {
+        const normalizedState = extracted.state.toLowerCase() === "bangalore" ? "Karnataka" : extracted.state;
+        const stateOption = Array.from(fields.stateTax.options).find((option) => option.value === normalizedState);
+        fields.stateTax.value = stateOption ? normalizedState : "DEFAULT";
+      }
+
+      calculate();
+      return appliedCount;
+    }
+
+    async function extractFromUploadedFile(file, fileExtension) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("/api/extract", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+
+        if (result.fields) {
+          applyExtractedFields(result.fields, file.name);
+        } else {
+          resetUploadedInfo("This upload was accepted, but no salary values were read from it. Enter or confirm the values manually on the left.");
+          calculate();
+        }
+
+        if (response.ok && result.ok) {
+          return result.message;
+        }
+
+        return result.message || "Could not read salary data from this file. Enter or confirm the values below, then calculate.";
+      } catch (error) {
+        if (fileExtension !== ".docx") {
+          resetUploadedInfo("This file was uploaded, but auto-reading is only available for text-based DOCX files right now. Enter or confirm the values manually on the left.");
+          calculate();
+          return "File uploaded successfully. Auto-reading is available for text-based DOCX files when the local extraction server is running. For this file type, enter or confirm the salary values below.";
+        }
+      }
+
+      const text = await readDocxText(file);
+      const extracted = extractSalaryFields(text);
+      const appliedCount = applyExtractedFields(extracted, file.name);
+
+      if (appliedCount === 0) {
+        return "Word document uploaded, but I could not find CTC/basic/HRA style labels. Enter or confirm the values below, then the calculator will work.";
+      }
+
+      return `Word document read successfully. I filled ${appliedCount} salary field${appliedCount === 1 ? "" : "s"} and recalculated your in-hand salary.`;
+    }
+
+    async function handleUploadedFile(file) {
+      clearUploadPreview();
+
+      if (!file) {
+        setUploadStatus("Please upload a clear JPG, PNG, WEBP, PDF, DOC, or DOCX of your offer letter or salary slip.", true);
+        return;
+      }
+
+      const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+
+      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+        setUploadStatus("This file type is not supported. Please upload a JPG, PNG, WEBP, PDF, DOC, or DOCX.", true);
+        return;
+      }
+
+      sampleBtn.disabled = true;
+      sampleBtn.textContent = "Sample disabled after upload";
+      fileName.textContent = `${file.name} (${plainIndianNumber(file.size / 1024)} KB)`;
+      fileName.classList.add("has-file");
+
+      if (file.type.startsWith("image/")) {
+        const image = document.createElement("img");
+        image.alt = "Uploaded salary document preview";
+        image.src = URL.createObjectURL(file);
+        image.onload = () => URL.revokeObjectURL(image.src);
+        uploadPreview.appendChild(image);
+      } else {
+        const documentPreview = document.createElement("div");
+        documentPreview.className = "pdf-preview";
+        documentPreview.textContent = fileExtension === ".doc" || fileExtension === ".docx"
+          ? "Word document uploaded successfully"
+          : "PDF uploaded successfully";
+        uploadPreview.appendChild(documentPreview);
+      }
+
+      uploadPreview.classList.add("show");
+      setUploadStatus("Reading file and calculating...");
+
+      try {
+        const message = await extractFromUploadedFile(file, fileExtension);
+        setUploadStatus(message);
+      } catch (error) {
+        calculate();
+        setUploadStatus(error.message || "Could not read salary data from this file. Enter or confirm the values below, then calculate.", true);
+      }
+    }
+
+    document.getElementById("chooseFileBtn").addEventListener("click", () => {
+      salaryFile.click();
+    });
+
+    salaryFile.addEventListener("change", async (event) => {
+      await handleUploadedFile(event.target.files[0]);
+    });
+
+    uploadZone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      uploadZone.classList.add("dragging");
+    });
+
+    uploadZone.addEventListener("dragleave", () => {
+      uploadZone.classList.remove("dragging");
+    });
+
+    uploadZone.addEventListener("drop", async (event) => {
+      event.preventDefault();
+      uploadZone.classList.remove("dragging");
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        salaryFile.files = transfer.files;
+      }
+      await handleUploadedFile(file);
+    });
+
+    function openFullBreakup(focus = "") {
+      hasTriedCalculate = true;
+      calculate(true);
+
+      if (output.inputErrorBox.style.display !== "none") {
+        showPage("input");
+        revealMissingInputs();
+        return;
+      }
+
+      showPage("output");
+
+      const detailsToggle = document.getElementById("detailsToggle");
+      detailsToggle.open = true;
+      document.getElementById("breakdown").classList.remove("locked");
+      document.getElementById("toast").classList.add("show");
+
+      const focusMap = {
+        pf: output.summaryEmployerPfAnnual?.closest(".summary-row-item"),
+        tax: output.summaryTaxableIncome?.closest(".summary-row-item"),
+        gratuity: output.summaryGratuityAnnual?.closest(".summary-row-item"),
+        summary: output.summaryMonthlyInHand?.closest(".line-item")
+      };
+
+      const target = focusMap[focus] || detailsToggle;
+      setTimeout(() => {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (target !== detailsToggle) {
+          target.classList.add("focus-flash");
+          setTimeout(() => target.classList.remove("focus-flash"), 1200);
+        }
+      }, 80);
+    }
+
+    document.getElementById("freeAccessBtn").addEventListener("click", () => openFullBreakup());
+
+    document.querySelectorAll(".breakup-chip").forEach((button) => {
+      button.addEventListener("click", () => openFullBreakup(button.dataset.focus || ""));
+    });
+
+    [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+      field.addEventListener("input", calculate);
+      field.addEventListener("blur", () => {
+        formatInput(field);
+        calculate();
+      });
+    });
+
+    fields.stateTax.addEventListener("input", calculate);
+    fields.stateTax.addEventListener("change", calculate);
+    fields.pfBasis.addEventListener("input", calculate);
+    fields.pfBasis.addEventListener("change", calculate);
+    fields.variablePayType.addEventListener("input", calculate);
+    fields.variablePayType.addEventListener("change", calculate);
+    fields.gratuityMentioned.addEventListener("input", calculate);
+    fields.gratuityMentioned.addEventListener("change", calculate);
+
+    [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+      formatInput(field);
+    });
+
+    hasTriedCalculate = false;
+    calculate(false);
+    showPage("input");
+  </script>
+</body>
+</html>
