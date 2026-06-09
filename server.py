@@ -175,7 +175,7 @@ class SalaryHandler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    host = os.environ.get("HOST", "127.0.0.1")
+    host = "0.0.0.0")
     port = int(os.environ.get("PORT", "4174"))
     server = ThreadingHTTPServer((host, port), SalaryHandler)
     print(f"Salary Decoder running at http://{host}:{port}/index.html")
