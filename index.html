@@ -971,11 +971,19 @@
       display: none;
     }
 
+    .old-tax-confirm {
+      padding: 0 12px 10px;
+    }
+
     .old-tax-grid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px 12px;
       padding: 0 12px 12px;
+    }
+
+    .old-tax-grid.show {
+      display: grid;
     }
 
     .hra-fields {
@@ -1350,7 +1358,16 @@
             </details>
             <details class="old-tax-options" id="oldTaxOptions">
               <summary>Old Regime Deductions</summary>
-              <div class="old-tax-grid">
+              <div class="old-tax-confirm">
+                <label>Any additional old-regime deductions? *
+                  <select id="oldDeductionsChoice">
+                    <option value="">Select yes or no</option>
+                    <option value="false">No, use only automatic employee PF</option>
+                    <option value="true">Yes, I have additional deductions</option>
+                  </select>
+                </label>
+              </div>
+              <div class="old-tax-grid" id="oldDeductionFields">
                 <label>Other 80C Investments Annual
                   <input id="other80cAnnual" type="text" inputmode="numeric" placeholder="excluding employee PF">
                 </label>
@@ -1368,6 +1385,7 @@
                 </label>
                 <label>Claim HRA Exemption?
                   <select id="claimHra">
+                    <option value="">Select yes or no</option>
                     <option value="false">No</option>
                     <option value="true">Yes</option>
                   </select>
