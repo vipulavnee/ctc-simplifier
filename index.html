@@ -927,6 +927,91 @@
       display: grid;
     }
 
+    .old-tax-options {
+      display: none;
+      grid-column: 1 / -1;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      background: #f7fff9;
+      overflow: hidden;
+    }
+
+    .old-tax-options.show {
+      display: block;
+    }
+
+    .old-tax-options summary {
+      padding: 10px 12px;
+      color: #14532d;
+      cursor: pointer;
+      font-weight: 900;
+      list-style: none;
+    }
+
+    .old-tax-options summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .old-tax-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      padding: 0 12px 12px;
+    }
+
+    .hra-fields {
+      display: none;
+      grid-column: 1 / -1;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px 12px;
+    }
+
+    .hra-fields.show {
+      display: grid;
+    }
+
+    .tax-comparison {
+      border: 2px solid #86efac;
+      border-radius: 8px;
+      padding: 12px;
+      background: #f0fdf4;
+    }
+
+    .tax-comparison h3 {
+      color: #14532d;
+      margin-bottom: 8px;
+    }
+
+    .tax-comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tax-comparison-card {
+      padding: 10px;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .tax-comparison-card span,
+    .tax-comparison-card strong {
+      display: block;
+    }
+
+    .tax-comparison-card span {
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tax-comparison-card strong {
+      margin-top: 4px;
+      color: #14532d;
+      font-size: 18px;
+    }
+
     .main-result {
       display: grid;
       gap: 6px;
@@ -1089,6 +1174,9 @@
       .summary-row,
       .data-grid,
       .advanced-grid,
+      .old-tax-grid,
+      .hra-fields,
+      .tax-comparison-grid,
       .reality-grid {
         grid-template-columns: 1fr;
       }
@@ -1164,11 +1252,21 @@
           </div>
 
           <div class="form-grid" id="salaryForm">
-            <label>Annual CTC
+            <label>Annual CTC *
               <input id="ctc" type="text" inputmode="numeric" placeholder="e.g. 18,00,000">
             </label>
-            <label class="breakup-field">HRA Monthly
-              <input id="hra" type="text" inputmode="numeric" placeholder="optional">
+            <label>Tax Regime *
+              <select id="taxRegime">
+                <option value="">Select tax regime</option>
+                <option value="compare">Compare both</option>
+                <option value="new">New tax regime</option>
+                <option value="old">Old tax regime</option>
+              </select>
+            </label>
+            <label>Financial Year
+              <select id="financialYear">
+                <option value="2025-26">FY 2025-26</option>
+              </select>
             </label>
             <label class="breakup-field">Gross Monthly
               <input id="grossMonthlyInput" type="text" inputmode="numeric" placeholder="e.g. 1,82,400">
@@ -1233,6 +1331,47 @@
                 </label>
               </div>
             </details>
+            <details class="old-tax-options" id="oldTaxOptions">
+              <summary>Old Regime Deductions</summary>
+              <div class="old-tax-grid">
+                <label>Other 80C Investments Annual
+                  <input id="other80cAnnual" type="text" inputmode="numeric" placeholder="excluding employee PF">
+                </label>
+                <label>Personal NPS 80CCD(1B) Annual
+                  <input id="personalNpsAnnual" type="text" inputmode="numeric" placeholder="up to 50,000">
+                </label>
+                <label>Eligible 80D Deduction Annual
+                  <input id="medical80dAnnual" type="text" inputmode="numeric" placeholder="eligible amount">
+                </label>
+                <label>Home Loan Interest Annual
+                  <input id="homeLoanInterestAnnual" type="text" inputmode="numeric" placeholder="up to 2,00,000">
+                </label>
+                <label>Other Eligible Deductions Annual
+                  <input id="otherOldDeductionsAnnual" type="text" inputmode="numeric" placeholder="optional">
+                </label>
+                <label>Claim HRA Exemption?
+                  <select id="claimHra">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </label>
+                <div class="hra-fields" id="hraFields">
+                  <label>HRA Received Monthly *
+                    <input id="hra" type="text" inputmode="numeric" placeholder="e.g. 30,000">
+                  </label>
+                  <label>Rent Paid Monthly *
+                    <input id="rentPaidMonthly" type="text" inputmode="numeric" placeholder="e.g. 35,000">
+                  </label>
+                  <label>City Category *
+                    <select id="hraCityType">
+                      <option value="">Select city category</option>
+                      <option value="metro">Metro: Delhi, Mumbai, Kolkata or Chennai</option>
+                      <option value="non-metro">Non-metro</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </details>
           </div>
           <div class="source-note flag" id="inputErrorBox" style="display: none;"></div>
 
@@ -1271,6 +1410,15 @@
           <span id="taxAnnual" style="display:none;">₹0</span>
           <span id="monthlyTax" style="display:none;">₹0</span>
 
+          <div class="tax-comparison" id="taxComparison">
+            <h3>Tax Regime Comparison</h3>
+            <div class="tax-comparison-grid">
+              <div class="tax-comparison-card"><span>New regime annual tax</span><strong id="newRegimeTax">₹0</strong></div>
+              <div class="tax-comparison-card"><span>Old regime annual tax</span><strong id="oldRegimeTax">₹0</strong></div>
+              <div class="tax-comparison-card"><span>Regime used</span><strong id="recommendedRegime">Waiting for input</strong></div>
+            </div>
+          </div>
+
           <div class="reality-check">
             <h3>CTC ÷ 12 Myth Buster</h3>
             <div class="reality-grid">
@@ -1308,12 +1456,14 @@
                 <div class="data-card"><span>Gratuity</span><strong id="uploadedGratuity">Waiting for upload</strong></div>
                 <div class="data-card"><span>PF Basis</span><strong id="uploadedPfBasis">Waiting for upload</strong></div>
                 <div class="data-card"><span>State</span><strong id="uploadedState">Waiting for upload</strong></div>
+                <div class="data-card"><span>Tax Regime</span><strong id="uploadedTaxRegime">Waiting for input</strong></div>
               </div>
               <div class="source-note" id="uploadReadNote">This section updates from whatever is typed on the left or filled by upload.</div>
               <div class="source-note" id="basicValidationNote">Basic validation will appear here.</div>
               <div class="source-note" id="calculationNote" style="display: none;"></div>
               <div class="explanation" id="explanation"></div>
               <div class="summary-table">
+              <div class="summary-row-item"><span>Tax regime used</span><strong id="summaryTaxRegime">Not selected</strong></div>
               <div class="summary-row-item"><span>Annual CTC</span><strong id="summaryCtc">₹0</strong></div>
               <div class="summary-row-item"><span>Employer PF</span><strong id="summaryEmployerPfAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer NPS</span><strong id="summaryEmployerNpsAnnual">₹0</strong></div>
@@ -1322,8 +1472,17 @@
               <div class="summary-row-item"><span>Gross annual salary</span><strong id="summaryGrossAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Standard deduction</span><strong id="summaryStandardDeduction">₹75,000</strong></div>
               <div class="summary-row-item"><span>Other tax-free deduction</span><strong id="summaryOtherTaxFreeAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Professional tax deduction</span><strong id="summaryPtDeduction">₹0</strong></div>
+              <div class="summary-row-item"><span>HRA exemption</span><strong id="summaryHraExemption">₹0</strong></div>
+              <div class="summary-row-item"><span>80C deduction</span><strong id="summary80cDeduction">₹0</strong></div>
+              <div class="summary-row-item"><span>Personal NPS deduction</span><strong id="summaryPersonalNpsDeduction">₹0</strong></div>
+              <div class="summary-row-item"><span>80D deduction</span><strong id="summary80dDeduction">₹0</strong></div>
+              <div class="summary-row-item"><span>Home loan interest deduction</span><strong id="summaryHomeLoanDeduction">₹0</strong></div>
+              <div class="summary-row-item"><span>Other old-regime deductions</span><strong id="summaryOtherOldDeductions">₹0</strong></div>
               <div class="summary-row-item"><span>Taxable income</span><strong id="summaryTaxableIncome">₹0</strong></div>
               <div class="summary-row-item"><span>Base tax</span><strong id="summaryBaseTax">₹0</strong></div>
+              <div class="summary-row-item"><span>Rebate / marginal relief</span><strong id="summaryTaxRelief">₹0</strong></div>
+              <div class="summary-row-item"><span>Surcharge</span><strong id="summarySurcharge">₹0</strong></div>
               <div class="summary-row-item"><span>Cess 4%</span><strong id="summaryCess">₹0</strong></div>
               <div class="summary-row-item"><span>Annual tax</span><strong id="summaryAnnualTax">₹0</strong></div>
               <div class="summary-row-item"><span>Monthly tax / TDS</span><strong id="summaryMonthlyTds">₹0</strong></div>
@@ -1381,7 +1540,17 @@
       conveyance: document.getElementById("conveyance"),
       gratuityMentioned: document.getElementById("gratuityMentioned"),
       pfBasis: document.getElementById("pfBasis"),
-      stateTax: document.getElementById("stateTax")
+      stateTax: document.getElementById("stateTax"),
+      taxRegime: document.getElementById("taxRegime"),
+      financialYear: document.getElementById("financialYear"),
+      other80cAnnual: document.getElementById("other80cAnnual"),
+      personalNpsAnnual: document.getElementById("personalNpsAnnual"),
+      medical80dAnnual: document.getElementById("medical80dAnnual"),
+      homeLoanInterestAnnual: document.getElementById("homeLoanInterestAnnual"),
+      otherOldDeductionsAnnual: document.getElementById("otherOldDeductionsAnnual"),
+      claimHra: document.getElementById("claimHra"),
+      rentPaidMonthly: document.getElementById("rentPaidMonthly"),
+      hraCityType: document.getElementById("hraCityType")
     };
 
     const output = {
@@ -1413,6 +1582,10 @@
       uploadedGratuity: document.getElementById("uploadedGratuity"),
       uploadedPfBasis: document.getElementById("uploadedPfBasis"),
       uploadedState: document.getElementById("uploadedState"),
+      uploadedTaxRegime: document.getElementById("uploadedTaxRegime"),
+      newRegimeTax: document.getElementById("newRegimeTax"),
+      oldRegimeTax: document.getElementById("oldRegimeTax"),
+      recommendedRegime: document.getElementById("recommendedRegime"),
       uploadSourceLabel: document.getElementById("uploadSourceLabel"),
       uploadReadNote: document.getElementById("uploadReadNote"),
       basicValidationNote: document.getElementById("basicValidationNote"),
@@ -1426,10 +1599,20 @@
       summaryGratuityAnnual: document.getElementById("summaryGratuityAnnual"),
       summaryEmployerEsicAnnual: document.getElementById("summaryEmployerEsicAnnual"),
       summaryGrossAnnual: document.getElementById("summaryGrossAnnual"),
+      summaryTaxRegime: document.getElementById("summaryTaxRegime"),
       summaryStandardDeduction: document.getElementById("summaryStandardDeduction"),
       summaryOtherTaxFreeAnnual: document.getElementById("summaryOtherTaxFreeAnnual"),
+      summaryPtDeduction: document.getElementById("summaryPtDeduction"),
+      summaryHraExemption: document.getElementById("summaryHraExemption"),
+      summary80cDeduction: document.getElementById("summary80cDeduction"),
+      summaryPersonalNpsDeduction: document.getElementById("summaryPersonalNpsDeduction"),
+      summary80dDeduction: document.getElementById("summary80dDeduction"),
+      summaryHomeLoanDeduction: document.getElementById("summaryHomeLoanDeduction"),
+      summaryOtherOldDeductions: document.getElementById("summaryOtherOldDeductions"),
       summaryTaxableIncome: document.getElementById("summaryTaxableIncome"),
       summaryBaseTax: document.getElementById("summaryBaseTax"),
+      summaryTaxRelief: document.getElementById("summaryTaxRelief"),
+      summarySurcharge: document.getElementById("summarySurcharge"),
       summaryCess: document.getElementById("summaryCess"),
       summaryAnnualTax: document.getElementById("summaryAnnualTax"),
       summaryMonthlyTds: document.getElementById("summaryMonthlyTds"),
@@ -1448,6 +1631,8 @@
     const outputPageTab = document.getElementById("outputPageTab");
     const editInputsBtn = document.getElementById("editInputsBtn");
     const advancedOptions = document.querySelector(".advanced-options");
+    const oldTaxOptions = document.getElementById("oldTaxOptions");
+    const hraFields = document.getElementById("hraFields");
 
     let lastUploadRead = null;
     let inputMode = "detailed";
@@ -1460,6 +1645,13 @@
       if (!fields.stateTax.value) missing.push("Employment State");
       if (!fields.gratuityMentioned.value) missing.push("Gratuity yes/no");
       if (!fields.pfBasis.value) missing.push("PF Basis");
+      if (!fields.taxRegime.value) missing.push("Tax Regime");
+      if ((fields.taxRegime.value === "old" || fields.taxRegime.value === "compare") && fields.claimHra.value === "true") {
+        if (readNumber(fields.basic) === 0) missing.push("Basic Monthly for HRA");
+        if (readNumber(fields.hra) === 0) missing.push("HRA Received Monthly");
+        if (readNumber(fields.rentPaidMonthly) === 0) missing.push("Rent Paid Monthly");
+        if (!fields.hraCityType.value) missing.push("HRA City Category");
+      }
 
       return missing;
     }
@@ -1472,6 +1664,23 @@
       calculateBtn.title = isReady
         ? "Ready to calculate"
         : `Missing: ${missing.join(", ")}`;
+    }
+
+    function taxRegimeLabel(regime) {
+      if (regime === "new") return "New tax regime";
+      if (regime === "old") return "Old tax regime";
+      if (regime === "compare") return "Compare both";
+      return "Not selected";
+    }
+
+    function updateTaxOptionVisibility() {
+      const usesOldRegime = fields.taxRegime.value === "old" || fields.taxRegime.value === "compare";
+      oldTaxOptions.classList.toggle("show", usesOldRegime);
+      hraFields.classList.toggle("show", usesOldRegime && fields.claimHra.value === "true");
+      if (usesOldRegime && fields.claimHra.value === "true") {
+        oldTaxOptions.open = true;
+        advancedOptions.open = true;
+      }
     }
 
     function revealMissingInputs() {
@@ -1584,6 +1793,7 @@
       output.uploadedGratuity.textContent = gratuityText;
       output.uploadedPfBasis.textContent = pfBasisLabel(fields.pfBasis.value);
       output.uploadedState.textContent = fields.stateTax.value === "DEFAULT" ? "Other / default" : fields.stateTax.value;
+      output.uploadedTaxRegime.textContent = taxRegimeLabel(fields.taxRegime.value);
       output.uploadSourceLabel.textContent = inputMode === "ctcOnly"
         ? "Estimated from CTC"
         : lastUploadRead ? "Upload filled, user-editable" : "Using current form values";
@@ -1642,22 +1852,27 @@
       output.uploadedGratuity.textContent = "Waiting for upload";
       output.uploadedPfBasis.textContent = "Waiting for input";
       output.uploadedState.textContent = "Waiting for upload";
+      output.uploadedTaxRegime.textContent = "Waiting for input";
       output.uploadSourceLabel.textContent = "Using current form values";
       output.uploadReadNote.textContent = message;
       output.calculatedFromLabel.textContent = "Using current input fields";
     }
 
     function resetCalculator() {
-      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance, fields.other80cAnnual, fields.personalNpsAnnual, fields.medical80dAnnual, fields.homeLoanInterestAnnual, fields.otherOldDeductionsAnnual, fields.rentPaidMonthly].filter(Boolean).forEach((field) => {
         field.value = "";
       });
 
       fields.gratuityMentioned.value = "";
       fields.pfBasis.value = "";
       fields.stateTax.value = "";
+      fields.taxRegime.value = "";
+      fields.claimHra.value = "false";
+      fields.hraCityType.value = "";
       fields.variablePayType.value = "none";
       salaryFile.value = "";
       fileName.textContent = "";
+      fileName.classList.remove("has-file");
       uploadPreview.innerHTML = "";
       uploadPreview.classList.remove("show");
       uploadStatus.textContent = "";
@@ -1667,6 +1882,9 @@
       sampleBtn.disabled = false;
       sampleBtn.textContent = "Load sample";
       hasTriedCalculate = false;
+      oldTaxOptions.open = false;
+      oldTaxOptions.classList.remove("show");
+      hraFields.classList.remove("show");
       setInputMode("detailed");
       resetUploadedInfo("Enter values manually or upload a text-based DOCX to fill them.");
       document.getElementById("breakdown").classList.remove("locked");
@@ -1686,14 +1904,106 @@
       input.value = plainIndianNumber(readNumber(input));
     }
 
-    function slabTax(income) {
+    function newRegimeBaseTax(income) {
       const taxable = Math.max(0, income);
-
-      if (taxable <= 1200000) return 0;
+      if (taxable <= 400000) return 0;
+      if (taxable <= 800000) return (taxable - 400000) * 0.05;
+      if (taxable <= 1200000) return 20000 + (taxable - 800000) * 0.10;
       if (taxable <= 1600000) return 60000 + (taxable - 1200000) * 0.15;
       if (taxable <= 2000000) return 120000 + (taxable - 1600000) * 0.20;
       if (taxable <= 2400000) return 200000 + (taxable - 2000000) * 0.25;
       return 300000 + (taxable - 2400000) * 0.30;
+    }
+
+    function oldRegimeBaseTax(income) {
+      const taxable = Math.max(0, income);
+      if (taxable <= 250000) return 0;
+      if (taxable <= 500000) return (taxable - 250000) * 0.05;
+      if (taxable <= 1000000) return 12500 + (taxable - 500000) * 0.20;
+      return 112500 + (taxable - 1000000) * 0.30;
+    }
+
+    function taxAfterRebateAndIncomeRelief(income, regime) {
+      const baseTax = regime === "old" ? oldRegimeBaseTax(income) : newRegimeBaseTax(income);
+      let rebate = 0;
+      let marginalRelief = 0;
+
+      if (regime === "old" && income <= 500000) {
+        rebate = Math.min(baseTax, 12500);
+      }
+
+      if (regime === "new") {
+        if (income <= 1200000) {
+          rebate = Math.min(baseTax, 60000);
+        } else {
+          marginalRelief = Math.max(0, baseTax - (income - 1200000));
+        }
+      }
+
+      return {
+        baseTax,
+        rebate,
+        incomeMarginalRelief: marginalRelief,
+        taxAfterRelief: Math.max(0, baseTax - rebate - marginalRelief)
+      };
+    }
+
+    function surchargeRate(income, regime) {
+      if (income <= 5000000) return 0;
+      if (income <= 10000000) return 0.10;
+      if (income <= 20000000) return 0.15;
+      if (income <= 50000000) return 0.25;
+      return regime === "old" ? 0.37 : 0.25;
+    }
+
+    function calculateTaxForRegime(income, regime) {
+      const taxableIncome = Math.max(0, income);
+      const reliefResult = taxAfterRebateAndIncomeRelief(taxableIncome, regime);
+      const rate = surchargeRate(taxableIncome, regime);
+      const surchargeBeforeRelief = reliefResult.taxAfterRelief * rate;
+      let taxBeforeCess = reliefResult.taxAfterRelief + surchargeBeforeRelief;
+      let surchargeMarginalRelief = 0;
+
+      const thresholds = regime === "old"
+        ? [5000000, 10000000, 20000000, 50000000]
+        : [5000000, 10000000, 20000000];
+      const threshold = [...thresholds].reverse().find((value) => taxableIncome > value);
+
+      if (threshold) {
+        const thresholdTax = taxAfterRebateAndIncomeRelief(threshold, regime).taxAfterRelief;
+        const thresholdTaxWithSurcharge = thresholdTax * (1 + surchargeRate(threshold, regime));
+        const marginalReliefLimit = thresholdTaxWithSurcharge + (taxableIncome - threshold);
+        if (taxBeforeCess > marginalReliefLimit) {
+          surchargeMarginalRelief = taxBeforeCess - marginalReliefLimit;
+          taxBeforeCess = marginalReliefLimit;
+        }
+      }
+
+      const surcharge = Math.max(0, taxBeforeCess - reliefResult.taxAfterRelief);
+      const cess = taxBeforeCess * 0.04;
+
+      return {
+        taxableIncome,
+        baseTax: reliefResult.baseTax,
+        rebate: reliefResult.rebate,
+        incomeMarginalRelief: reliefResult.incomeMarginalRelief,
+        surchargeMarginalRelief,
+        surcharge,
+        cess,
+        annualTax: taxBeforeCess + cess
+      };
+    }
+
+    function calculateHraExemption(annualBasic) {
+      if (fields.claimHra.value !== "true") return 0;
+      const annualHra = readNumber(fields.hra) * 12;
+      const annualRent = readNumber(fields.rentPaidMonthly) * 12;
+      const cityPercent = fields.hraCityType.value === "metro" ? 0.50 : 0.40;
+      return Math.max(0, Math.min(
+        annualHra,
+        Math.max(0, annualRent - annualBasic * 0.10),
+        annualBasic * cityPercent
+      ));
     }
 
     function professionalTaxForState(state, grossMonthly) {
@@ -1738,6 +2048,9 @@
       output.annualInHand.textContent = "₹0";
       output.taxAnnual.textContent = "₹0";
       output.monthlyTax.textContent = "₹0";
+      output.newRegimeTax.textContent = "₹0";
+      output.oldRegimeTax.textContent = "₹0";
+      output.recommendedRegime.textContent = "Waiting for input";
       output.ctcAssumption.textContent = "₹0";
       output.realityActual.textContent = "₹0";
       output.realityDiff.textContent = "₹0";
@@ -1760,10 +2073,20 @@
       output.summaryGratuityAnnual.textContent = "₹0";
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = "₹0";
       output.summaryGrossAnnual.textContent = "₹0";
+      output.summaryTaxRegime.textContent = "Not selected";
       output.summaryStandardDeduction.textContent = money(75000);
       output.summaryOtherTaxFreeAnnual.textContent = "₹0";
+      output.summaryPtDeduction.textContent = "₹0";
+      output.summaryHraExemption.textContent = "₹0";
+      output.summary80cDeduction.textContent = "₹0";
+      output.summaryPersonalNpsDeduction.textContent = "₹0";
+      output.summary80dDeduction.textContent = "₹0";
+      output.summaryHomeLoanDeduction.textContent = "₹0";
+      output.summaryOtherOldDeductions.textContent = "₹0";
       output.summaryTaxableIncome.textContent = "₹0";
       output.summaryBaseTax.textContent = "₹0";
+      output.summaryTaxRelief.textContent = "₹0";
+      output.summarySurcharge.textContent = "₹0";
       output.summaryCess.textContent = "₹0";
       output.summaryAnnualTax.textContent = "₹0";
       output.summaryMonthlyTds.textContent = "₹0";
@@ -1771,6 +2094,7 @@
     }
 
     function calculate(showErrors = hasTriedCalculate) {
+      updateTaxOptionVisibility();
       updateCalculateButtonState();
       const ctc = readNumber(fields.ctc);
       const variableMonthlyInput = variableMonthlyFromInput();
@@ -1832,7 +2156,7 @@
       }
 
       if (hasBlockingFlags) {
-        setPendingCalculation("Complete Annual CTC, gratuity yes/no, PF basis, and employment state to see the estimate.");
+        setPendingCalculation("Complete Annual CTC, gratuity yes/no, PF basis, employment state, and tax regime to see the estimate.");
         return;
       }
 
@@ -1868,12 +2192,30 @@
       const employerEsicAnnual = employerEsicMonthly * 12;
       const professionalTaxMonthly = professionalTaxForState(fields.stateTax.value, grossMonthlyForCalc);
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
-      const taxableIncome = Math.max(0, annualGross - 75000 - otherTaxFreeAnnual);
-      const taxBeforeRebate = slabTax(taxableIncome);
-      const rebate = 0;
-      const taxAfterRebate = Math.max(0, taxBeforeRebate - rebate);
-      const cess = taxAfterRebate * 0.04;
-      const taxAnnual = taxAfterRebate + cess;
+      const hraExemption = calculateHraExemption(annualBasic);
+      const old80cDeduction = Math.min(150000, employeePfAnnual + readNumber(fields.other80cAnnual));
+      const personalNpsDeduction = Math.min(50000, readNumber(fields.personalNpsAnnual));
+      const medical80dDeduction = readNumber(fields.medical80dAnnual);
+      const homeLoanInterestDeduction = Math.min(200000, readNumber(fields.homeLoanInterestAnnual));
+      const otherOldDeductions = readNumber(fields.otherOldDeductionsAnnual);
+      const professionalTaxAnnual = professionalTaxMonthly * 12;
+      const newTaxableIncome = Math.max(0, annualGross - 75000 - otherTaxFreeAnnual);
+      const oldTaxableIncome = Math.max(0,
+        annualGross - 50000 - otherTaxFreeAnnual - professionalTaxAnnual - hraExemption -
+        old80cDeduction - personalNpsDeduction - medical80dDeduction -
+        homeLoanInterestDeduction - otherOldDeductions
+      );
+      const newTaxResult = calculateTaxForRegime(newTaxableIncome, "new");
+      const oldTaxResult = calculateTaxForRegime(oldTaxableIncome, "old");
+      const selectedTaxRegime = fields.taxRegime.value;
+      const appliedRegime = selectedTaxRegime === "compare"
+        ? (oldTaxResult.annualTax < newTaxResult.annualTax ? "old" : "new")
+        : selectedTaxRegime;
+      const appliedTaxResult = appliedRegime === "old" ? oldTaxResult : newTaxResult;
+      const taxableIncome = appliedTaxResult.taxableIncome;
+      const taxBeforeRebate = appliedTaxResult.baseTax;
+      const cess = appliedTaxResult.cess;
+      const taxAnnual = appliedTaxResult.annualTax;
       const tdsMonthly = taxAnnual / 12;
       const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
       const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
@@ -1887,6 +2229,12 @@
       output.annualInHand.textContent = money(annualInHand);
       output.taxAnnual.textContent = money(taxAnnual);
       output.monthlyTax.textContent = money(tdsMonthly);
+      output.newRegimeTax.textContent = money(newTaxResult.annualTax);
+      output.oldRegimeTax.textContent = money(oldTaxResult.annualTax);
+      const taxSaving = Math.abs(newTaxResult.annualTax - oldTaxResult.annualTax);
+      output.recommendedRegime.textContent = selectedTaxRegime === "compare"
+        ? `${appliedRegime === "old" ? "Old" : "New"} regime${taxSaving > 0 ? ` saves ${money(taxSaving)}` : " (same tax)"}`
+        : `${appliedRegime === "old" ? "Old" : "New"} regime selected`;
       output.ctcAssumption.textContent = money(ctcMonthlyAssumption);
       output.realityActual.textContent = money(monthlyInHand);
       output.realityDiff.textContent = money(monthlyDifference);
@@ -1910,10 +2258,22 @@
       output.summaryGratuityAnnual.textContent = money(gratuityProvision);
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
       output.summaryGrossAnnual.textContent = money(annualGross);
-      output.summaryStandardDeduction.textContent = money(75000);
+      output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY ${fields.financialYear.value}`;
+      output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
+      output.summaryPtDeduction.textContent = money(appliedRegime === "old" ? professionalTaxAnnual : 0);
+      output.summaryHraExemption.textContent = money(appliedRegime === "old" ? hraExemption : 0);
+      output.summary80cDeduction.textContent = money(appliedRegime === "old" ? old80cDeduction : 0);
+      output.summaryPersonalNpsDeduction.textContent = money(appliedRegime === "old" ? personalNpsDeduction : 0);
+      output.summary80dDeduction.textContent = money(appliedRegime === "old" ? medical80dDeduction : 0);
+      output.summaryHomeLoanDeduction.textContent = money(appliedRegime === "old" ? homeLoanInterestDeduction : 0);
+      output.summaryOtherOldDeductions.textContent = money(appliedRegime === "old" ? otherOldDeductions : 0);
       output.summaryTaxableIncome.textContent = money(taxableIncome);
       output.summaryBaseTax.textContent = money(taxBeforeRebate);
+      output.summaryTaxRelief.textContent = money(
+        appliedTaxResult.rebate + appliedTaxResult.incomeMarginalRelief + appliedTaxResult.surchargeMarginalRelief
+      );
+      output.summarySurcharge.textContent = money(appliedTaxResult.surcharge);
       output.summaryCess.textContent = money(cess);
       output.summaryAnnualTax.textContent = money(taxAnnual);
       output.summaryMonthlyTds.textContent = money(tdsMonthly);
@@ -1964,7 +2324,10 @@
       fields.gratuityMentioned.value = "true";
       fields.pfBasis.value = "actual";
       fields.stateTax.value = "Karnataka";
-      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach(formatInput);
+      fields.taxRegime.value = "compare";
+      fields.claimHra.value = "false";
+      fields.other80cAnnual.value = 50000;
+      [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance, fields.other80cAnnual].filter(Boolean).forEach(formatInput);
       calculate();
     });
 
@@ -2311,7 +2674,9 @@
       button.addEventListener("click", () => openFullBreakup(button.dataset.focus || ""));
     });
 
-    [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+    const amountFields = [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance, fields.other80cAnnual, fields.personalNpsAnnual, fields.medical80dAnnual, fields.homeLoanInterestAnnual, fields.otherOldDeductionsAnnual, fields.rentPaidMonthly].filter(Boolean);
+
+    amountFields.forEach((field) => {
       field.addEventListener("input", calculate);
       field.addEventListener("blur", () => {
         formatInput(field);
@@ -2327,8 +2692,17 @@
     fields.variablePayType.addEventListener("change", calculate);
     fields.gratuityMentioned.addEventListener("input", calculate);
     fields.gratuityMentioned.addEventListener("change", calculate);
+    fields.taxRegime.addEventListener("change", () => {
+      updateTaxOptionVisibility();
+      calculate();
+    });
+    fields.claimHra.addEventListener("change", () => {
+      updateTaxOptionVisibility();
+      calculate();
+    });
+    fields.hraCityType.addEventListener("change", calculate);
 
-    [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance].filter(Boolean).forEach((field) => {
+    amountFields.forEach((field) => {
       formatInput(field);
     });
 
