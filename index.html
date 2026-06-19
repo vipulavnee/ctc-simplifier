@@ -2380,6 +2380,7 @@
       fields.pfBasis.value = "actual";
       fields.stateTax.value = "Karnataka";
       fields.taxRegime.value = "compare";
+      fields.oldDeductionsChoice.value = "true";
       fields.claimHra.value = "false";
       fields.other80cAnnual.value = 50000;
       [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance, fields.other80cAnnual].filter(Boolean).forEach(formatInput);
@@ -2751,6 +2752,11 @@
     fields.gratuityMentioned.addEventListener("input", calculate);
     fields.gratuityMentioned.addEventListener("change", calculate);
     fields.taxRegime.addEventListener("change", () => {
+      updateTaxOptionVisibility();
+      calculate();
+    });
+    fields.oldDeductionsChoice.addEventListener("change", () => {
+      if (fields.oldDeductionsChoice.value !== "true") fields.claimHra.value = "";
       updateTaxOptionVisibility();
       calculate();
     });
