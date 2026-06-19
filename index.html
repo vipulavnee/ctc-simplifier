@@ -248,6 +248,87 @@
       color: #ffffff;
     }
 
+    .impact-controls,
+    .impact-summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .impact-summary {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .impact-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+    }
+
+    .impact-card.highlight {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .impact-card span,
+    .impact-card small {
+      display: block;
+      color: var(--muted);
+    }
+
+    .impact-card strong {
+      display: block;
+      margin: 6px 0;
+      color: #111827;
+      font-size: 24px;
+    }
+
+    .impact-table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .impact-table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+    }
+
+    .impact-table th,
+    .impact-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+    }
+
+    .impact-table th:first-child,
+    .impact-table td:first-child {
+      text-align: left;
+    }
+
+    .impact-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 13px;
+    }
+
+    .impact-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .impact-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-left: 4px solid #2563eb;
+      background: #eff6ff;
+      color: #334155;
+      line-height: 1.55;
+    }
+
     .panel {
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -1214,7 +1295,9 @@
       .old-tax-grid,
       .hra-fields,
       .tax-comparison-grid,
-      .reality-grid {
+      .reality-grid,
+      .impact-controls,
+      .impact-summary {
         grid-template-columns: 1fr;
       }
 
@@ -1255,6 +1338,7 @@
     <div class="page-nav">
       <button class="page-tab active" id="inputPageTab" type="button">Input</button>
       <button class="page-tab" id="outputPageTab" type="button">Output</button>
+      <button class="page-tab" id="impactPageTab" type="button">Increment Impact</button>
     </div>
 
     <section class="page active" id="inputPage">
@@ -1594,6 +1678,78 @@
           <div class="toast" id="toast">Full breakup is available free initially.</div>
         </div>
       </div>
+      </div>
+    </section>
+
+    <section class="page" id="impactPage">
+      <div class="page-shell">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Increment Impact Analyser</h2>
+              <p class="muted">See how a small annual increment gap compounds—and what delaying a job change may cost.</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="impact-controls">
+              <label>Current Annual CTC
+                <input id="impactCtc" type="text" inputmode="numeric" placeholder="e.g. 12,00,000">
+              </label>
+              <label>Higher Increment %
+                <input id="higherIncrement" type="number" min="0" max="100" step="0.5" value="10">
+              </label>
+              <label>Lower Increment %
+                <input id="lowerIncrement" type="number" min="0" max="100" step="0.5" value="6">
+              </label>
+              <label>Job Change Hike %
+                <input id="jobChangeIncrement" type="number" min="0" max="200" step="1" value="30">
+              </label>
+              <label>Time Horizon
+                <select id="impactYears">
+                  <option value="3">3 years</option>
+                  <option value="5" selected>5 years</option>
+                  <option value="7">7 years</option>
+                  <option value="10">10 years</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="impact-summary">
+              <div class="impact-card">
+                <span>10% vs 6% cumulative earnings gap</span>
+                <strong id="incrementEarningsGap">₹0</strong>
+                <small id="incrementGapCaption">Across 5 years</small>
+              </div>
+              <div class="impact-card">
+                <span>Final annual CTC gap</span>
+                <strong id="finalCtcGap">₹0</strong>
+                <small id="finalGapCaption">Higher vs lower increment</small>
+              </div>
+              <div class="impact-card highlight">
+                <span>Cost of no job change</span>
+                <strong id="noChangeCost">₹0</strong>
+                <small id="noChangeCaption">Missed cumulative CTC vs switching now</small>
+              </div>
+            </div>
+
+            <div class="impact-table-wrap">
+              <table class="impact-table">
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th id="higherHeading">Stay: 10%</th>
+                    <th id="lowerHeading">Stay: 6%</th>
+                    <th id="switchHeading">Switch: 30% then 10%</th>
+                    <th>Annual loss at 6%</th>
+                    <th>No-switch annual loss</th>
+                  </tr>
+                </thead>
+                <tbody id="impactTableBody"></tbody>
+              </table>
+            </div>
+            <div class="impact-note" id="impactInsight">Enter your current CTC to see the compounding impact.</div>
+          </div>
+        </div>
       </div>
     </section>
     <footer>Built by <span class="vipul-name">Vipul Sharma</span> | HR &amp; Compensation Specialist</footer>
