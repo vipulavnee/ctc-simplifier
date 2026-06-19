@@ -1325,11 +1325,13 @@
                     <option value="zero">Zero PF</option>
                   </select>
                 </label>
-            <label>Variable Pay
+            <label>Employer NPS Monthly <span class="optional-text">(optional)</span>
+              <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000">
+            </label>
+            <label>One-time / Off-cycle / Variable Pay
                   <select id="variablePayType">
-                    <option value="none">No variable pay</option>
-                    <option value="monthly">Monthly variable amount</option>
-                    <option value="annual">Annual variable amount</option>
+                    <option value="none">No additional pay</option>
+                    <option value="annual">Enter annual payout</option>
                   </select>
                 </label>
             <details class="advanced-options">
@@ -1338,11 +1340,8 @@
                 <label>Basic Monthly <span class="optional-text">(optional)</span>
               <input id="basic" type="text" inputmode="numeric" placeholder="e.g. 75,000">
             </label>
-                <label>Variable Pay Amount
-                  <input id="variable" type="text" inputmode="numeric" placeholder="optional">
-                </label>
-                <label>Employer NPS Monthly <span class="optional-text">(optional)</span>
-                  <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000">
+                <label>Annual One-time / Off-cycle / Variable Pay
+                  <input id="variable" type="text" inputmode="numeric" placeholder="fully taxable">
                 </label>
                 <label>Other Tax-Free Component Monthly <span class="optional-text">(optional)</span>
                   <input id="otherTaxFreeMonthly" type="text" inputmode="numeric" placeholder="e.g. 10,000">
