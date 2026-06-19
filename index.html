@@ -1832,14 +1832,15 @@
         : `${money(monthlyValue * 12)} annual · fully taxable`;
     }
 
-    function estimatedFromCtc(ctc, pfBasis = "", gratuityIncluded = "", employerNpsMonthly = 0) {
+    function estimatedFromCtc(ctc, pfBasis = "", gratuityIncluded = "", employerPfIncluded = "", employerNpsMonthly = 0) {
       const basic = ctc * 0.5 / 12;
       const hra = basic * 0.5;
       const employerPfMonthly = employeePfForBasis(basic, pfBasis);
       const employerPfAnnual = employerPfMonthly * 12;
       const gratuityAnnual = gratuityIncluded === "true" ? basic * 12 * 0.0481 : 0;
       const employerNpsAnnual = employerNpsMonthly * 12;
-      const annualGross = Math.max(0, ctc - employerPfAnnual - employerNpsAnnual - gratuityAnnual);
+      const employerPfInsideCtc = employerPfIncluded === "true" ? employerPfAnnual : 0;
+      const annualGross = Math.max(0, ctc - employerPfInsideCtc - employerNpsAnnual - gratuityAnnual);
       const grossMonthly = annualGross / 12;
 
       return {
@@ -2268,7 +2269,7 @@
         ctcOnlyModeBtn.classList.add("active");
       }
 
-      const estimate = estimatedFromCtc(ctc, fields.pfBasis.value, fields.gratuityMentioned.value, employerNpsMonthly);
+      const estimate = estimatedFromCtc(ctc, fields.pfBasis.value, fields.gratuityMentioned.value, fields.employerPfIncluded.value, employerNpsMonthly);
       const basic = readNumber(fields.basic) || estimate.basic;
       const hra = readNumber(fields.hra) || estimate.hra;
       const conveyance = readNumber(fields.conveyance) || estimate.conveyance;
@@ -2321,7 +2322,8 @@
       const gratuityProvision = fields.gratuityMentioned.value === "true" ? basic * 12 * gratuityRate : 0;
       const employerNpsAnnual = employerNpsMonthly * 12;
       const userEnteredGrossMonthly = readNumber(fields.grossMonthlyInput) > 0;
-      const fixedCtcDeductionsAnnual = employeePfAnnual + employerNpsAnnual + gratuityProvision;
+      const employerPfInsideCtcAnnual = fields.employerPfIncluded.value === "true" ? employeePfAnnual : 0;
+      const fixedCtcDeductionsAnnual = employerPfInsideCtcAnnual + employerNpsAnnual + gratuityProvision;
       let annualGross;
       let employerEsicMonthly = 0;
 
