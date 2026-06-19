@@ -2105,41 +2105,76 @@
       };
     }
 
-    function professionalTaxForState(state, grossMonthly) {
-      if (!state) return 0;
+    const PT_LWF_RULES = {
+      "Andhra Pradesh": { pt: true, ptAnnual: 2400, ptFrequency: "Monthly", lwf: "Yes", employee: "30", employer: "70", lwfFrequency: "Annual", remarks: "" },
+      "Assam": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Bihar": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Chhattisgarh": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "15", employer: "30", lwfFrequency: "Half-yearly", remarks: "" },
+      "Delhi": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "Limited", employee: "1", employer: "2", lwfFrequency: "Monthly", remarks: "Rarely implemented" },
+      "Goa": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "Yes", employee: "60", employer: "120", lwfFrequency: "Half-yearly", remarks: "" },
+      "Gujarat": { pt: true, ptAnnual: 2400, ptFrequency: "Monthly", lwf: "Yes", employee: "6", employer: "12", lwfFrequency: "Half-yearly", remarks: "" },
+      "Haryana": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "Yes", employee: "34/month", employer: "68/month", lwfFrequency: "Monthly", remarks: "Revised Apr-2025" },
+      "Himachal Pradesh": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Jharkhand": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Karnataka": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "50", employer: "100", lwfFrequency: "Annual", remarks: "" },
+      "Kerala": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "10", employer: "20", lwfFrequency: "Half-yearly", remarks: "" },
+      "Madhya Pradesh": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "10", employer: "20", lwfFrequency: "Half-yearly", remarks: "" },
+      "Maharashtra": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "25", employer: "75", lwfFrequency: "Half-yearly", remarks: "" },
+      "Manipur": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Meghalaya": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Mizoram": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Nagaland": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Odisha": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "Yes", employee: "10", employer: "20", lwfFrequency: "Half-yearly", remarks: "" },
+      "Punjab": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "Yes", employee: "10", employer: "20", lwfFrequency: "Half-yearly", remarks: "" },
+      "Rajasthan": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Sikkim": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Tamil Nadu": { pt: true, ptAnnual: 2500, ptFrequency: "Half-yearly", lwf: "Yes", employee: "20", employer: "40", lwfFrequency: "Half-yearly", remarks: "" },
+      "Telangana": { pt: true, ptAnnual: 2400, ptFrequency: "Monthly", lwf: "Yes", employee: "10", employer: "20", lwfFrequency: "Half-yearly", remarks: "" },
+      "Tripura": { pt: true, ptAnnual: 2500, ptFrequency: "Monthly", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Uttar Pradesh": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "Uttarakhand": { pt: false, ptAnnual: 0, ptFrequency: "Not applicable", lwf: "No", employee: null, employer: null, lwfFrequency: "Not applicable", remarks: "" },
+      "West Bengal": { pt: true, ptAnnual: 2400, ptFrequency: "Monthly", lwf: "Yes", employee: "3", employer: "30", lwfFrequency: "Half-yearly", remarks: "" }
+    };
 
-      const fixedRules = {
-        Delhi: 0,
-        Maharashtra: 200,
-        "Tamil Nadu": 100,
-        Gujarat: 200,
-        Haryana: 0,
-        "West Bengal": 100,
-        "Uttar Pradesh": 0,
-        Punjab: 200,
-        Rajasthan: 200,
-        DEFAULT: 200
-      };
-
-      if (state === "Telangana" || state === "Andhra Pradesh") return 0;
-      if (state === "Karnataka") return grossMonthly < 15000 ? 0 : 100;
-      return fixedRules[state] ?? fixedRules.DEFAULT;
+    function contributionAmount(value) {
+      return Math.max(0, Number.parseFloat(String(value || 0).replace(/[^\d.]/g, "")) || 0);
     }
 
-    function professionalTaxNote(state, professionalTaxMonthly) {
-      if (!state) {
-        return "PT not calculated until state is selected.";
+    function annualizeContribution(value, frequency) {
+      const contribution = contributionAmount(value);
+      if (frequency === "Monthly") return contribution * 12;
+      if (frequency === "Half-yearly") return contribution * 2;
+      if (frequency === "Annual") return contribution;
+      return 0;
+    }
+
+    function statutoryContributionsForState(state) {
+      const rule = PT_LWF_RULES[state];
+      if (!rule) {
+        return {
+          professionalTaxAnnual: 0,
+          professionalTaxMonthly: 0,
+          employeeLwfAnnual: 0,
+          employeeLwfDeductionAnnual: 0,
+          employerLwfAnnual: 0,
+          lwfFrequency: "No master rule"
+        };
       }
 
-      if (professionalTaxMonthly === 0) {
-        return `${state} PT: not applicable / zero.`;
-      }
+      const employeeLwfAnnual = annualizeContribution(rule.employee, rule.lwfFrequency);
+      const employerLwfAnnual = annualizeContribution(rule.employer, rule.lwfFrequency);
+      const conditionalLwf = rule.lwf === "Limited";
 
-      if (state === "Karnataka") {
-        return `Karnataka PT: ${money(professionalTaxMonthly)} monthly based on gross monthly salary.`;
-      }
-
-      return `${state} PT: ${money(professionalTaxMonthly)} monthly.`;
+      return {
+        professionalTaxAnnual: rule.pt ? rule.ptAnnual : 0,
+        professionalTaxMonthly: rule.pt ? rule.ptAnnual / 12 : 0,
+        employeeLwfAnnual,
+        employeeLwfDeductionAnnual: conditionalLwf ? 0 : employeeLwfAnnual,
+        employerLwfAnnual,
+        lwfFrequency: conditionalLwf
+          ? `${rule.lwfFrequency} · conditional, not auto-deducted`
+          : rule.lwfFrequency
+      };
     }
 
     function setPendingCalculation(message) {
