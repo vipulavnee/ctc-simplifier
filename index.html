@@ -1583,6 +1583,7 @@
       medical80dAnnual: document.getElementById("medical80dAnnual"),
       homeLoanInterestAnnual: document.getElementById("homeLoanInterestAnnual"),
       otherOldDeductionsAnnual: document.getElementById("otherOldDeductionsAnnual"),
+      oldDeductionsChoice: document.getElementById("oldDeductionsChoice"),
       claimHra: document.getElementById("claimHra"),
       rentPaidMonthly: document.getElementById("rentPaidMonthly"),
       hraCityType: document.getElementById("hraCityType")
@@ -1668,6 +1669,7 @@
     const editInputsBtn = document.getElementById("editInputsBtn");
     const advancedOptions = document.querySelector(".advanced-options");
     const oldTaxOptions = document.getElementById("oldTaxOptions");
+    const oldDeductionFields = document.getElementById("oldDeductionFields");
     const hraFields = document.getElementById("hraFields");
 
     let lastUploadRead = null;
@@ -1682,7 +1684,11 @@
       if (!fields.gratuityMentioned.value) missing.push("Gratuity yes/no");
       if (!fields.pfBasis.value) missing.push("PF Basis");
       if (!fields.taxRegime.value) missing.push("Tax Regime");
-      if ((fields.taxRegime.value === "old" || fields.taxRegime.value === "compare") && fields.claimHra.value === "true") {
+      const usesOldRegime = fields.taxRegime.value === "old" || fields.taxRegime.value === "compare";
+      const hasAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
+      if (usesOldRegime && !fields.oldDeductionsChoice.value) missing.push("Additional old-regime deductions yes/no");
+      if (usesOldRegime && hasAdditionalOldDeductions && !fields.claimHra.value) missing.push("HRA exemption yes/no");
+      if (usesOldRegime && hasAdditionalOldDeductions && fields.claimHra.value === "true") {
         if (readNumber(fields.basic) === 0) missing.push("Basic Monthly for HRA");
         if (readNumber(fields.hra) === 0) missing.push("HRA Received Monthly");
         if (readNumber(fields.rentPaidMonthly) === 0) missing.push("Rent Paid Monthly");
@@ -1711,9 +1717,12 @@
 
     function updateTaxOptionVisibility() {
       const usesOldRegime = fields.taxRegime.value === "old" || fields.taxRegime.value === "compare";
+      const hasAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
       oldTaxOptions.classList.toggle("show", usesOldRegime);
-      hraFields.classList.toggle("show", usesOldRegime && fields.claimHra.value === "true");
-      if (usesOldRegime && fields.claimHra.value === "true") {
+      oldDeductionFields.classList.toggle("show", usesOldRegime && hasAdditionalOldDeductions);
+      hraFields.classList.toggle("show", usesOldRegime && hasAdditionalOldDeductions && fields.claimHra.value === "true");
+      if (usesOldRegime) oldTaxOptions.open = true;
+      if (usesOldRegime && hasAdditionalOldDeductions && fields.claimHra.value === "true") {
         oldTaxOptions.open = true;
         advancedOptions.open = true;
       }
@@ -1906,7 +1915,8 @@
       fields.pfBasis.value = "";
       fields.stateTax.value = "";
       fields.taxRegime.value = "";
-      fields.claimHra.value = "false";
+      fields.oldDeductionsChoice.value = "";
+      fields.claimHra.value = "";
       fields.hraCityType.value = "";
       fields.variablePayType.value = "none";
       salaryFile.value = "";
@@ -1923,6 +1933,7 @@
       hasTriedCalculate = false;
       oldTaxOptions.open = false;
       oldTaxOptions.classList.remove("show");
+      oldDeductionFields.classList.remove("show");
       hraFields.classList.remove("show");
       setInputMode("detailed");
       resetUploadedInfo("Enter values manually or upload a text-based DOCX to fill them.");
