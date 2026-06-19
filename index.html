@@ -1234,7 +1234,10 @@
           <p>CTC to actual in-hand</p>
         </div>
       </div>
-      <div class="status-pill"><span class="dot"></span><span>Calculator ready</span></div>
+      <div class="status-pill">
+        <span class="dot"></span>
+        <span>Last updated: <strong id="lastUpdatedAt">Loading...</strong></span>
+      </div>
     </header>
 
     <section class="intro">
@@ -1602,6 +1605,20 @@
       currency: "INR",
       maximumFractionDigits: 0
     });
+
+    const lastUpdatedAt = document.getElementById("lastUpdatedAt");
+    const documentUpdatedAt = new Date(document.lastModified);
+    lastUpdatedAt.textContent = Number.isNaN(documentUpdatedAt.getTime())
+      ? "Recently"
+      : new Intl.DateTimeFormat("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Kolkata"
+        }).format(documentUpdatedAt);
 
     const fields = {
       ctc: document.getElementById("ctc"),
