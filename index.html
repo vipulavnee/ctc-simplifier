@@ -1487,6 +1487,7 @@
               <div class="summary-row-item"><span>Gratuity</span><strong id="summaryGratuityAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer ESIC</span><strong id="summaryEmployerEsicAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Gross annual salary</span><strong id="summaryGrossAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>One-time / off-cycle / variable pay</span><strong id="summaryVariableAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Standard deduction</span><strong id="summaryStandardDeduction">₹75,000</strong></div>
               <div class="summary-row-item"><span>Other tax-free deduction</span><strong id="summaryOtherTaxFreeAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Professional tax deduction</span><strong id="summaryPtDeduction">₹0</strong></div>
@@ -1615,6 +1616,7 @@
       summaryGratuityAnnual: document.getElementById("summaryGratuityAnnual"),
       summaryEmployerEsicAnnual: document.getElementById("summaryEmployerEsicAnnual"),
       summaryGrossAnnual: document.getElementById("summaryGrossAnnual"),
+      summaryVariableAnnual: document.getElementById("summaryVariableAnnual"),
       summaryTaxRegime: document.getElementById("summaryTaxRegime"),
       summaryStandardDeduction: document.getElementById("summaryStandardDeduction"),
       summaryOtherTaxFreeAnnual: document.getElementById("summaryOtherTaxFreeAnnual"),
@@ -2092,6 +2094,7 @@
       output.summaryGratuityAnnual.textContent = "₹0";
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = "₹0";
       output.summaryGrossAnnual.textContent = "₹0";
+      output.summaryVariableAnnual.textContent = "₹0";
       output.summaryTaxRegime.textContent = "Not selected";
       output.summaryStandardDeduction.textContent = money(75000);
       output.summaryOtherTaxFreeAnnual.textContent = "₹0";
@@ -2279,6 +2282,7 @@
       output.summaryGratuityAnnual.textContent = money(gratuityProvision);
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
       output.summaryGrossAnnual.textContent = money(annualGross);
+      output.summaryVariableAnnual.textContent = money(variableAnnual);
       output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
