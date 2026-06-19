@@ -1864,7 +1864,7 @@
       const flags = [];
       const missing = missingCompulsoryInputs();
 
-      if (missing.length > 0) flags.push(`Please fill: ${missing.join(", ")}.`);
+      if (missing.length > 0) flags.push(`Please fill compulsory details: ${missing.join(", ")}.`);
       const annualBasic = basicForCalculation * 12;
       if (fields.stateTax.value === "DEFAULT") flags.push("Other/default state selected, so default PT is being used.");
 
