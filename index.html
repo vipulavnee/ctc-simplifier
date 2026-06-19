@@ -2494,6 +2494,7 @@
       fields.conveyance.value = 2400;
       fields.gratuityMentioned.value = "true";
       fields.pfBasis.value = "actual";
+      fields.employerPfIncluded.value = "true";
       fields.stateTax.value = "Karnataka";
       fields.taxRegime.value = "compare";
       fields.oldDeductionsChoice.value = "true";
@@ -2860,6 +2861,8 @@
     fields.stateTax.addEventListener("change", calculate);
     fields.pfBasis.addEventListener("input", calculate);
     fields.pfBasis.addEventListener("change", calculate);
+    fields.employerPfIncluded.addEventListener("input", calculate);
+    fields.employerPfIncluded.addEventListener("change", calculate);
     fields.variablePayType.addEventListener("input", calculate);
     fields.variablePayType.addEventListener("change", () => {
       if (fields.variablePayType.value === "annual") advancedOptions.open = true;
