@@ -2194,6 +2194,7 @@
       output.grossMonthly.textContent = "₹0";
       output.employeePfMonthly.textContent = "₹0";
       output.professionalTaxMonthly.textContent = "₹0";
+      output.employeeLwfMonthly.textContent = "₹0";
       output.tdsMonthly.textContent = "₹0";
       output.esicMonthly.textContent = "₹0";
       output.taxableIncome.textContent = "₹0";
@@ -2211,6 +2212,10 @@
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = "₹0";
       output.summaryGrossAnnual.textContent = "₹0";
       output.summaryVariableAnnual.textContent = "₹0";
+      output.summaryProfessionalTaxAnnual.textContent = "₹0";
+      output.summaryEmployeeLwfAnnual.textContent = "₹0";
+      output.summaryEmployerLwfAnnual.textContent = "₹0";
+      output.summaryLwfFrequency.textContent = "Not applicable";
       output.summaryTaxRegime.textContent = "Not selected";
       output.summaryStandardDeduction.textContent = money(75000);
       output.summaryOtherTaxFreeAnnual.textContent = "₹0";
@@ -2330,7 +2335,9 @@
       const regularAnnualGross = Math.max(0, annualGross - variableAnnual);
       const grossMonthlyForCalc = regularAnnualGross / 12;
       const employerEsicAnnual = employerEsicMonthly * 12;
-      const professionalTaxMonthly = professionalTaxForState(fields.stateTax.value, grossMonthlyForCalc);
+      const statutoryContributions = statutoryContributionsForState(fields.stateTax.value);
+      const professionalTaxMonthly = statutoryContributions.professionalTaxMonthly;
+      const employeeLwfMonthly = statutoryContributions.employeeLwfDeductionAnnual / 12;
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
       const useAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
       const hraExemption = calculateHraExemption(annualBasic);
@@ -2339,7 +2346,7 @@
       const medical80dDeduction = useAdditionalOldDeductions ? readNumber(fields.medical80dAnnual) : 0;
       const homeLoanInterestDeduction = useAdditionalOldDeductions ? Math.min(200000, readNumber(fields.homeLoanInterestAnnual)) : 0;
       const otherOldDeductions = useAdditionalOldDeductions ? readNumber(fields.otherOldDeductionsAnnual) : 0;
-      const professionalTaxAnnual = professionalTaxMonthly * 12;
+      const professionalTaxAnnual = statutoryContributions.professionalTaxAnnual;
       const newEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "new");
       const oldEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "old");
       const newTaxableIncome = Math.max(0, annualGross + newEmployerNpsTax.taxableExcess - 75000 - otherTaxFreeAnnual);
@@ -2361,7 +2368,7 @@
       const taxAnnual = appliedTaxResult.annualTax;
       const tdsMonthly = taxAnnual / 12;
       const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
-      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
+      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - employeeLwfMonthly - tdsMonthly - esicMonthly;
       const annualInHand = monthlyInHand * 12 + variableAnnual;
       const ctcMonthlyAssumption = ctc / 12;
       const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
@@ -2388,6 +2395,7 @@
       output.employeePfMonthly.textContent = money(employeePfMonthly);
       if (output.employerNpsMonthlyOutput) output.employerNpsMonthlyOutput.textContent = money(employerNpsMonthly);
       output.professionalTaxMonthly.textContent = money(professionalTaxMonthly);
+      output.employeeLwfMonthly.textContent = money(employeeLwfMonthly);
       output.tdsMonthly.textContent = money(tdsMonthly);
       output.esicMonthly.textContent = money(esicMonthly);
       output.taxableIncome.textContent = money(taxableIncome);
@@ -2406,6 +2414,10 @@
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
       output.summaryGrossAnnual.textContent = money(annualGross);
       output.summaryVariableAnnual.textContent = money(variableAnnual);
+      output.summaryProfessionalTaxAnnual.textContent = money(statutoryContributions.professionalTaxAnnual);
+      output.summaryEmployeeLwfAnnual.textContent = money(statutoryContributions.employeeLwfAnnual);
+      output.summaryEmployerLwfAnnual.textContent = money(statutoryContributions.employerLwfAnnual);
+      output.summaryLwfFrequency.textContent = statutoryContributions.lwfFrequency;
       output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
