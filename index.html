@@ -2045,7 +2045,7 @@
     }
 
     function calculateHraExemption(annualBasic) {
-      if (fields.claimHra.value !== "true") return 0;
+      if (fields.oldDeductionsChoice.value !== "true" || fields.claimHra.value !== "true") return 0;
       const annualHra = readNumber(fields.hra) * 12;
       const annualRent = readNumber(fields.rentPaidMonthly) * 12;
       const cityPercent = fields.hraCityType.value === "metro" ? 0.50 : 0.40;
@@ -2245,12 +2245,13 @@
       const employerEsicAnnual = employerEsicMonthly * 12;
       const professionalTaxMonthly = professionalTaxForState(fields.stateTax.value, grossMonthlyForCalc);
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
+      const useAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
       const hraExemption = calculateHraExemption(annualBasic);
-      const old80cDeduction = Math.min(150000, employeePfAnnual + readNumber(fields.other80cAnnual));
-      const personalNpsDeduction = Math.min(50000, readNumber(fields.personalNpsAnnual));
-      const medical80dDeduction = readNumber(fields.medical80dAnnual);
-      const homeLoanInterestDeduction = Math.min(200000, readNumber(fields.homeLoanInterestAnnual));
-      const otherOldDeductions = readNumber(fields.otherOldDeductionsAnnual);
+      const old80cDeduction = Math.min(150000, employeePfAnnual + (useAdditionalOldDeductions ? readNumber(fields.other80cAnnual) : 0));
+      const personalNpsDeduction = useAdditionalOldDeductions ? Math.min(50000, readNumber(fields.personalNpsAnnual)) : 0;
+      const medical80dDeduction = useAdditionalOldDeductions ? readNumber(fields.medical80dAnnual) : 0;
+      const homeLoanInterestDeduction = useAdditionalOldDeductions ? Math.min(200000, readNumber(fields.homeLoanInterestAnnual)) : 0;
+      const otherOldDeductions = useAdditionalOldDeductions ? readNumber(fields.otherOldDeductionsAnnual) : 0;
       const professionalTaxAnnual = professionalTaxMonthly * 12;
       const newTaxableIncome = Math.max(0, annualGross - 75000 - otherTaxFreeAnnual);
       const oldTaxableIncome = Math.max(0,
