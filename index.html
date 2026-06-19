@@ -1359,6 +1359,13 @@
                     <option value="zero">Zero PF</option>
                   </select>
                 </label>
+            <label>Is employer PF part of CTC? *
+              <select id="employerPfIncluded">
+                <option value="">Select yes or no</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </label>
             <label>Employer NPS Monthly <span class="optional-text">(optional)</span>
               <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000">
             </label>
@@ -1516,6 +1523,7 @@
                 <div class="data-card"><span>Other Tax-Free Monthly</span><strong id="uploadedOtherTaxFreeMonthly">Not provided</strong></div>
                 <div class="data-card"><span>Gratuity</span><strong id="uploadedGratuity">Waiting for upload</strong></div>
                 <div class="data-card"><span>PF Basis</span><strong id="uploadedPfBasis">Waiting for upload</strong></div>
+                <div class="data-card"><span>Employer PF in CTC</span><strong id="uploadedEmployerPfIncluded">Waiting for input</strong></div>
                 <div class="data-card"><span>State</span><strong id="uploadedState">Waiting for upload</strong></div>
                 <div class="data-card"><span>Tax Regime</span><strong id="uploadedTaxRegime">Waiting for input</strong></div>
               </div>
@@ -1526,6 +1534,7 @@
               <div class="summary-table">
               <div class="summary-row-item"><span>Tax regime used</span><strong id="summaryTaxRegime">Not selected</strong></div>
               <div class="summary-row-item"><span>Annual CTC</span><strong id="summaryCtc">₹0</strong></div>
+              <div class="summary-row-item"><span>Employer PF included in CTC</span><strong id="summaryEmployerPfIncluded">Not selected</strong></div>
               <div class="summary-row-item"><span>Employer PF</span><strong id="summaryEmployerPfAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer NPS</span><strong id="summaryEmployerNpsAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Eligible employer NPS deduction</span><strong id="summaryEmployerNpsEligible">₹0</strong></div>
