@@ -1746,11 +1746,14 @@
     }
 
     function variableMonthlyFromInput() {
-      return 0;
+      if (fields.variablePayType.value !== "annual") return 0;
+      return readNumber(fields.variable) / 12;
     }
 
     function variablePayLabel(monthlyValue) {
-      return fields.variablePayType.value === "none" ? "No variable pay" : "Ignored for now";
+      return fields.variablePayType.value === "none"
+        ? "No additional pay"
+        : `${money(monthlyValue * 12)} annual · fully taxable`;
     }
 
     function estimatedFromCtc(ctc, pfBasis = "", gratuityIncluded = "", employerNpsMonthly = 0) {
@@ -2204,7 +2207,9 @@
         }
       }
 
-      const grossMonthlyForCalc = annualGross / 12;
+      const variableAnnual = Math.min(annualGross, variableMonthlyInput * 12);
+      const regularAnnualGross = Math.max(0, annualGross - variableAnnual);
+      const grossMonthlyForCalc = regularAnnualGross / 12;
       const employerEsicAnnual = employerEsicMonthly * 12;
       const professionalTaxMonthly = professionalTaxForState(fields.stateTax.value, grossMonthlyForCalc);
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
@@ -2235,7 +2240,7 @@
       const tdsMonthly = taxAnnual / 12;
       const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
       const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
-      const annualInHand = monthlyInHand * 12;
+      const annualInHand = monthlyInHand * 12 + variableAnnual;
       const ctcMonthlyAssumption = ctc / 12;
       const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
       const tier = ctc < 1275000 ? "Tier 1" : "Tier 2";
