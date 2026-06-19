@@ -2070,6 +2070,15 @@
       ));
     }
 
+    function employerNpsTaxTreatment(employerNpsAnnual, annualBasic, regime) {
+      const salaryLimitRate = regime === "old" ? 0.10 : 0.14;
+      const eligibleDeduction = Math.min(employerNpsAnnual, annualBasic * salaryLimitRate, 750000);
+      return {
+        eligibleDeduction,
+        taxableExcess: Math.max(0, employerNpsAnnual - eligibleDeduction)
+      };
+    }
+
     function professionalTaxForState(state, grossMonthly) {
       if (!state) return 0;
 
@@ -2270,9 +2279,11 @@
       const homeLoanInterestDeduction = useAdditionalOldDeductions ? Math.min(200000, readNumber(fields.homeLoanInterestAnnual)) : 0;
       const otherOldDeductions = useAdditionalOldDeductions ? readNumber(fields.otherOldDeductionsAnnual) : 0;
       const professionalTaxAnnual = professionalTaxMonthly * 12;
-      const newTaxableIncome = Math.max(0, annualGross - 75000 - otherTaxFreeAnnual);
+      const newEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "new");
+      const oldEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "old");
+      const newTaxableIncome = Math.max(0, annualGross + newEmployerNpsTax.taxableExcess - 75000 - otherTaxFreeAnnual);
       const oldTaxableIncome = Math.max(0,
-        annualGross - 50000 - otherTaxFreeAnnual - professionalTaxAnnual - hraExemption -
+        annualGross + oldEmployerNpsTax.taxableExcess - 50000 - otherTaxFreeAnnual - professionalTaxAnnual - hraExemption -
         old80cDeduction - personalNpsDeduction - medical80dDeduction -
         homeLoanInterestDeduction - otherOldDeductions
       );
@@ -2327,6 +2338,9 @@
       output.summaryCtc.textContent = money(ctc);
       output.summaryEmployerPfAnnual.textContent = money(employeePfAnnual);
       if (output.summaryEmployerNpsAnnual) output.summaryEmployerNpsAnnual.textContent = money(employerNpsAnnual);
+      const appliedEmployerNpsTax = appliedRegime === "old" ? oldEmployerNpsTax : newEmployerNpsTax;
+      output.summaryEmployerNpsEligible.textContent = money(appliedEmployerNpsTax.eligibleDeduction);
+      output.summaryEmployerNpsTaxableExcess.textContent = money(appliedEmployerNpsTax.taxableExcess);
       output.summaryGratuityAnnual.textContent = money(gratuityProvision);
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
       output.summaryGrossAnnual.textContent = money(annualGross);
