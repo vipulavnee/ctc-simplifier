@@ -1729,6 +1729,7 @@
       if (!fields.stateTax.value) missing.push("Employment State");
       if (!fields.gratuityMentioned.value) missing.push("Gratuity yes/no");
       if (!fields.pfBasis.value) missing.push("PF Basis");
+      if (!fields.employerPfIncluded.value) missing.push("Employer PF in CTC yes/no");
       if (!fields.taxRegime.value) missing.push("Tax Regime");
       const usesOldRegime = fields.taxRegime.value === "old" || fields.taxRegime.value === "compare";
       const hasAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
@@ -1886,6 +1887,9 @@
       output.uploadedOtherTaxFreeMonthly.textContent = inputMoney(otherTaxFreeMonthly);
       output.uploadedGratuity.textContent = gratuityText;
       output.uploadedPfBasis.textContent = pfBasisLabel(fields.pfBasis.value);
+      output.uploadedEmployerPfIncluded.textContent = fields.employerPfIncluded.value === "true"
+        ? "Yes"
+        : fields.employerPfIncluded.value === "false" ? "No" : "Not selected";
       output.uploadedState.textContent = fields.stateTax.value === "DEFAULT" ? "Other / default" : fields.stateTax.value;
       output.uploadedTaxRegime.textContent = taxRegimeLabel(fields.taxRegime.value);
       output.uploadSourceLabel.textContent = inputMode === "ctcOnly"
@@ -1945,6 +1949,7 @@
       output.uploadedOtherTaxFreeMonthly.textContent = "Not provided";
       output.uploadedGratuity.textContent = "Waiting for upload";
       output.uploadedPfBasis.textContent = "Waiting for input";
+      output.uploadedEmployerPfIncluded.textContent = "Waiting for input";
       output.uploadedState.textContent = "Waiting for upload";
       output.uploadedTaxRegime.textContent = "Waiting for input";
       output.uploadSourceLabel.textContent = "Using current form values";
@@ -1959,6 +1964,7 @@
 
       fields.gratuityMentioned.value = "";
       fields.pfBasis.value = "";
+      fields.employerPfIncluded.value = "";
       fields.stateTax.value = "";
       fields.taxRegime.value = "";
       fields.oldDeductionsChoice.value = "";
