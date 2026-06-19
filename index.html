@@ -441,6 +441,25 @@
       font-weight: 700;
     }
 
+    .static-field {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .static-field strong {
+      display: flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8faf9;
+      color: var(--ink);
+    }
+
     .optional-text {
       color: #64748b;
       font-weight: 700;
@@ -1263,11 +1282,10 @@
                 <option value="old">Old tax regime</option>
               </select>
             </label>
-            <label>Financial Year
-              <select id="financialYear">
-                <option value="2025-26">FY 2025-26</option>
-              </select>
-            </label>
+            <div class="static-field">
+              <span>Financial Year</span>
+              <strong>FY 2025-26</strong>
+            </div>
             <label class="breakup-field">Gross Monthly
               <input id="grossMonthlyInput" type="text" inputmode="numeric" placeholder="e.g. 1,82,400">
             </label>
@@ -1542,7 +1560,6 @@
       pfBasis: document.getElementById("pfBasis"),
       stateTax: document.getElementById("stateTax"),
       taxRegime: document.getElementById("taxRegime"),
-      financialYear: document.getElementById("financialYear"),
       other80cAnnual: document.getElementById("other80cAnnual"),
       personalNpsAnnual: document.getElementById("personalNpsAnnual"),
       medical80dAnnual: document.getElementById("medical80dAnnual"),
@@ -2258,7 +2275,7 @@
       output.summaryGratuityAnnual.textContent = money(gratuityProvision);
       if (output.summaryEmployerEsicAnnual) output.summaryEmployerEsicAnnual.textContent = money(employerEsicAnnual);
       output.summaryGrossAnnual.textContent = money(annualGross);
-      output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY ${fields.financialYear.value}`;
+      output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
       output.summaryPtDeduction.textContent = money(appliedRegime === "old" ? professionalTaxAnnual : 0);
