@@ -2217,6 +2217,7 @@
       output.explanation.textContent = "";
       output.calculationNote.textContent = "";
       output.summaryCtc.textContent = "₹0";
+      output.summaryEmployerPfIncluded.textContent = "Not selected";
       output.summaryEmployerPfAnnual.textContent = "₹0";
       if (output.summaryEmployerNpsAnnual) output.summaryEmployerNpsAnnual.textContent = "₹0";
       output.summaryEmployerNpsEligible.textContent = "₹0";
@@ -2311,7 +2312,7 @@
       }
 
       if (hasBlockingFlags) {
-        setPendingCalculation("Complete Annual CTC, gratuity yes/no, PF basis, employment state, and tax regime to see the estimate.");
+        setPendingCalculation("Complete all compulsory salary questions to see the estimate.");
         return;
       }
 
@@ -2416,6 +2417,7 @@
       output.calculationNote.textContent = "";
       renderCurrentInputData({ ctc, basic, hra, variable, grossMonthly: grossMonthlyForCalc, npsMonthly: employerNpsMonthly, otherTaxFreeMonthly });
       output.summaryCtc.textContent = money(ctc);
+      output.summaryEmployerPfIncluded.textContent = fields.employerPfIncluded.value === "true" ? "Yes" : "No";
       output.summaryEmployerPfAnnual.textContent = money(employeePfAnnual);
       if (output.summaryEmployerNpsAnnual) output.summaryEmployerNpsAnnual.textContent = money(employerNpsAnnual);
       const appliedEmployerNpsTax = appliedRegime === "old" ? oldEmployerNpsTax : newEmployerNpsTax;
