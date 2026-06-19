@@ -1039,6 +1039,16 @@
       font-size: 18px;
     }
 
+    .tax-saving-flash {
+      color: #22c55e !important;
+      animation: taxSavingFlash 1.25s ease-in-out infinite;
+    }
+
+    @keyframes taxSavingFlash {
+      0%, 42%, 100% { opacity: 1; }
+      62%, 78% { opacity: 0.22; }
+    }
+
     .main-result {
       display: grid;
       gap: 6px;
@@ -2101,6 +2111,7 @@
       output.newRegimeTax.textContent = "₹0";
       output.oldRegimeTax.textContent = "₹0";
       output.recommendedRegime.textContent = "Waiting for input";
+      output.recommendedRegime.classList.remove("tax-saving-flash");
       output.ctcAssumption.textContent = "₹0";
       output.realityActual.textContent = "₹0";
       output.realityDiff.textContent = "₹0";
@@ -2287,8 +2298,9 @@
       output.oldRegimeTax.textContent = money(oldTaxResult.annualTax);
       const taxSaving = Math.abs(newTaxResult.annualTax - oldTaxResult.annualTax);
       output.recommendedRegime.textContent = selectedTaxRegime === "compare"
-        ? `${appliedRegime === "old" ? "Old" : "New"} regime${taxSaving > 0 ? ` saves ${money(taxSaving)}` : " (same tax)"}`
+        ? `${appliedRegime === "old" ? "Old" : "New"} regime${taxSaving > 0 ? ` saves ${money(taxSaving)} tax` : " (same tax)"}`
         : `${appliedRegime === "old" ? "Old" : "New"} regime selected`;
+      output.recommendedRegime.classList.toggle("tax-saving-flash", selectedTaxRegime === "compare" && taxSaving > 0);
       output.ctcAssumption.textContent = money(ctcMonthlyAssumption);
       output.realityActual.textContent = money(monthlyInHand);
       output.realityDiff.textContent = money(monthlyDifference);
