@@ -2341,8 +2341,8 @@
       fields.basic.value = 75000;
       fields.hra.value = 37500;
       fields.grossMonthlyInput.value = "";
-      fields.variablePayType.value = "monthly";
-      fields.variable.value = 30000;
+      fields.variablePayType.value = "annual";
+      fields.variable.value = 300000;
       fields.npsMonthly.value = "";
       fields.otherTaxFreeMonthly.value = "";
       fields.conveyance.value = 2400;
@@ -2714,7 +2714,10 @@
     fields.pfBasis.addEventListener("input", calculate);
     fields.pfBasis.addEventListener("change", calculate);
     fields.variablePayType.addEventListener("input", calculate);
-    fields.variablePayType.addEventListener("change", calculate);
+    fields.variablePayType.addEventListener("change", () => {
+      if (fields.variablePayType.value === "annual") advancedOptions.open = true;
+      calculate();
+    });
     fields.gratuityMentioned.addEventListener("input", calculate);
     fields.gratuityMentioned.addEventListener("change", calculate);
     fields.taxRegime.addEventListener("change", () => {
