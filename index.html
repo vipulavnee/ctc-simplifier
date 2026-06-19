@@ -2156,6 +2156,7 @@
         return {
           professionalTaxAnnual: 0,
           professionalTaxMonthly: 0,
+          ptFrequency: "No master rule",
           employeeLwfAnnual: 0,
           employeeLwfDeductionAnnual: 0,
           employerLwfAnnual: 0,
@@ -2170,6 +2171,7 @@
       return {
         professionalTaxAnnual: rule.pt ? rule.ptAnnual : 0,
         professionalTaxMonthly: rule.pt ? rule.ptAnnual / 12 : 0,
+        ptFrequency: rule.pt ? `${rule.ptFrequency} · maximum annual estimate` : "Not applicable",
         employeeLwfAnnual,
         employeeLwfDeductionAnnual: conditionalLwf ? 0 : employeeLwfAnnual,
         employerLwfAnnual,
