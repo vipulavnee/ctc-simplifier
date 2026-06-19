@@ -1536,9 +1536,6 @@
               <div class="summary-row-item"><span>One-time / off-cycle / variable pay</span><strong id="summaryVariableAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Maximum professional tax annual estimate</span><strong id="summaryProfessionalTaxAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Professional tax frequency</span><strong id="summaryPtFrequency">Not applicable</strong></div>
-              <div class="summary-row-item"><span>Employee LWF annual equivalent</span><strong id="summaryEmployeeLwfAnnual">₹0</strong></div>
-              <div class="summary-row-item"><span>Employer LWF annual equivalent</span><strong id="summaryEmployerLwfAnnual">₹0</strong></div>
-              <div class="summary-row-item"><span>LWF frequency</span><strong id="summaryLwfFrequency">Not applicable</strong></div>
               <div class="summary-row-item"><span>Standard deduction</span><strong id="summaryStandardDeduction">₹75,000</strong></div>
               <div class="summary-row-item"><span>Other tax-free deduction</span><strong id="summaryOtherTaxFreeAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Professional tax deduction</span><strong id="summaryPtDeduction">₹0</strong></div>
@@ -1560,7 +1557,6 @@
                 <div class="line-item"><span>Gross monthly</span><strong id="grossMonthly">₹0</strong></div>
                 <div class="line-item"><span>Employee PF monthly</span><strong id="employeePfMonthly">₹0</strong></div>
                 <div class="line-item"><span>Professional tax monthly equivalent</span><strong id="professionalTaxMonthly">₹0</strong></div>
-                <div class="line-item"><span>Employee LWF monthly equivalent</span><strong id="employeeLwfMonthly">₹0</strong></div>
                 <div class="line-item"><span>Average monthly TDS</span><strong id="tdsMonthly">₹0</strong></div>
                 <div class="line-item"><span>Employee ESIC monthly</span><strong id="esicMonthly">₹0</strong></div>
                 <div class="line-item take-home-line"><span>Monthly in-hand (take home)</span><strong id="summaryMonthlyInHand">₹0</strong></div>
@@ -1637,7 +1633,6 @@
       grossMonthly: document.getElementById("grossMonthly"),
       employeePfMonthly: document.getElementById("employeePfMonthly"),
       professionalTaxMonthly: document.getElementById("professionalTaxMonthly"),
-      employeeLwfMonthly: document.getElementById("employeeLwfMonthly"),
       tdsMonthly: document.getElementById("tdsMonthly"),
       esicMonthly: document.getElementById("esicMonthly"),
       taxableIncome: document.getElementById("taxableIncome"),
@@ -1675,9 +1670,6 @@
       summaryVariableAnnual: document.getElementById("summaryVariableAnnual"),
       summaryProfessionalTaxAnnual: document.getElementById("summaryProfessionalTaxAnnual"),
       summaryPtFrequency: document.getElementById("summaryPtFrequency"),
-      summaryEmployeeLwfAnnual: document.getElementById("summaryEmployeeLwfAnnual"),
-      summaryEmployerLwfAnnual: document.getElementById("summaryEmployerLwfAnnual"),
-      summaryLwfFrequency: document.getElementById("summaryLwfFrequency"),
       summaryTaxRegime: document.getElementById("summaryTaxRegime"),
       summaryStandardDeduction: document.getElementById("summaryStandardDeduction"),
       summaryOtherTaxFreeAnnual: document.getElementById("summaryOtherTaxFreeAnnual"),
@@ -2198,7 +2190,6 @@
       output.grossMonthly.textContent = "₹0";
       output.employeePfMonthly.textContent = "₹0";
       output.professionalTaxMonthly.textContent = "₹0";
-      output.employeeLwfMonthly.textContent = "₹0";
       output.tdsMonthly.textContent = "₹0";
       output.esicMonthly.textContent = "₹0";
       output.taxableIncome.textContent = "₹0";
@@ -2218,9 +2209,6 @@
       output.summaryVariableAnnual.textContent = "₹0";
       output.summaryProfessionalTaxAnnual.textContent = "₹0";
       output.summaryPtFrequency.textContent = "Not applicable";
-      output.summaryEmployeeLwfAnnual.textContent = "₹0";
-      output.summaryEmployerLwfAnnual.textContent = "₹0";
-      output.summaryLwfFrequency.textContent = "Not applicable";
       output.summaryTaxRegime.textContent = "Not selected";
       output.summaryStandardDeduction.textContent = money(75000);
       output.summaryOtherTaxFreeAnnual.textContent = "₹0";
@@ -2342,7 +2330,6 @@
       const employerEsicAnnual = employerEsicMonthly * 12;
       const statutoryContributions = statutoryContributionsForState(fields.stateTax.value);
       const professionalTaxMonthly = statutoryContributions.professionalTaxMonthly;
-      const employeeLwfMonthly = statutoryContributions.employeeLwfDeductionAnnual / 12;
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
       const useAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
       const hraExemption = calculateHraExemption(annualBasic);
@@ -2373,7 +2360,7 @@
       const taxAnnual = appliedTaxResult.annualTax;
       const tdsMonthly = taxAnnual / 12;
       const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
-      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - employeeLwfMonthly - tdsMonthly - esicMonthly;
+      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
       const annualInHand = monthlyInHand * 12 + variableAnnual;
       const ctcMonthlyAssumption = ctc / 12;
       const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
@@ -2400,7 +2387,6 @@
       output.employeePfMonthly.textContent = money(employeePfMonthly);
       if (output.employerNpsMonthlyOutput) output.employerNpsMonthlyOutput.textContent = money(employerNpsMonthly);
       output.professionalTaxMonthly.textContent = money(professionalTaxMonthly);
-      output.employeeLwfMonthly.textContent = money(employeeLwfMonthly);
       output.tdsMonthly.textContent = money(tdsMonthly);
       output.esicMonthly.textContent = money(esicMonthly);
       output.taxableIncome.textContent = money(taxableIncome);
@@ -2421,9 +2407,6 @@
       output.summaryVariableAnnual.textContent = money(variableAnnual);
       output.summaryProfessionalTaxAnnual.textContent = money(statutoryContributions.professionalTaxAnnual);
       output.summaryPtFrequency.textContent = statutoryContributions.ptFrequency;
-      output.summaryEmployeeLwfAnnual.textContent = money(statutoryContributions.employeeLwfAnnual);
-      output.summaryEmployerLwfAnnual.textContent = money(statutoryContributions.employerLwfAnnual);
-      output.summaryLwfFrequency.textContent = statutoryContributions.lwfFrequency;
       output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
