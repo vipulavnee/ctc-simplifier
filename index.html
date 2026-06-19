@@ -1535,6 +1535,7 @@
               <div class="summary-row-item"><span>Gross annual salary</span><strong id="summaryGrossAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>One-time / off-cycle / variable pay</span><strong id="summaryVariableAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Maximum professional tax annual estimate</span><strong id="summaryProfessionalTaxAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Professional tax frequency</span><strong id="summaryPtFrequency">Not applicable</strong></div>
               <div class="summary-row-item"><span>Employee LWF annual equivalent</span><strong id="summaryEmployeeLwfAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer LWF annual equivalent</span><strong id="summaryEmployerLwfAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>LWF frequency</span><strong id="summaryLwfFrequency">Not applicable</strong></div>
@@ -1673,6 +1674,7 @@
       summaryGrossAnnual: document.getElementById("summaryGrossAnnual"),
       summaryVariableAnnual: document.getElementById("summaryVariableAnnual"),
       summaryProfessionalTaxAnnual: document.getElementById("summaryProfessionalTaxAnnual"),
+      summaryPtFrequency: document.getElementById("summaryPtFrequency"),
       summaryEmployeeLwfAnnual: document.getElementById("summaryEmployeeLwfAnnual"),
       summaryEmployerLwfAnnual: document.getElementById("summaryEmployerLwfAnnual"),
       summaryLwfFrequency: document.getElementById("summaryLwfFrequency"),
@@ -2213,6 +2215,7 @@
       output.summaryGrossAnnual.textContent = "₹0";
       output.summaryVariableAnnual.textContent = "₹0";
       output.summaryProfessionalTaxAnnual.textContent = "₹0";
+      output.summaryPtFrequency.textContent = "Not applicable";
       output.summaryEmployeeLwfAnnual.textContent = "₹0";
       output.summaryEmployerLwfAnnual.textContent = "₹0";
       output.summaryLwfFrequency.textContent = "Not applicable";
@@ -2415,6 +2418,7 @@
       output.summaryGrossAnnual.textContent = money(annualGross);
       output.summaryVariableAnnual.textContent = money(variableAnnual);
       output.summaryProfessionalTaxAnnual.textContent = money(statutoryContributions.professionalTaxAnnual);
+      output.summaryPtFrequency.textContent = statutoryContributions.ptFrequency;
       output.summaryEmployeeLwfAnnual.textContent = money(statutoryContributions.employeeLwfAnnual);
       output.summaryEmployerLwfAnnual.textContent = money(statutoryContributions.employerLwfAnnual);
       output.summaryLwfFrequency.textContent = statutoryContributions.lwfFrequency;
