@@ -1,0 +1,20 @@
+{
+  "name": "womens-t20-world-cup-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live ICC Women's T20 World Cup dashboard",
+  "main": "server-womens.js",
+  "scripts": {
+    "start": "node server-womens.js",
+    "check": "node --check server-womens.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.16.1",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}

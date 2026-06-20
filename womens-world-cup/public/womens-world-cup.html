@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vipul's Women's World Cup Scoreboard</title>
+
+<style>
+:root{
+  --bg:#020817;--card:#071226;--line:#12345b;--text:#f8fafc;--muted:#cbd5e1;
+  --green:#00ff85;--blue:#2563ff;--cyan:#00e5ff;--orange:#ff7b00;--red:#ff3b5c;--purple:#8b5cf6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+.page{max-width:1600px;margin:auto;padding:8px}
+.topbar,.actions,.brand,.score-row,.stat,.timer,.match-row{display:flex;align-items:center}
+.topbar{justify-content:space-between;margin-bottom:8px}
+.brand{gap:12px}
+.logo{width:42px;height:42px;border-radius:12px;background:#1d4ed8;display:grid;place-items:center;font-weight:950}
+.title{font-size:34px;font-weight:950;letter-spacing:-.04em}
+.subtitle{font-size:13px;color:var(--muted)}
+.actions{gap:10px}
+.status,.btn{border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:900}
+.status{color:var(--green);background:#04111f}.status.warn{color:var(--orange)}.status.bad{color:var(--red)}
+.btn{cursor:pointer;background:#1d4ed8;color:white}
+
+.hero{
+  border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:8px;
+  background:linear-gradient(rgba(0,0,0,.10),rgba(0,0,0,.28)),url('./stadium.png') center/cover no-repeat;
+}
+.hero-grid{display:grid;grid-template-columns:1fr .9fr}
+.hero-left,.hero-right{padding:14px 18px;background:rgba(0,0,0,.38)}
+.eyebrow{font-size:30px;color:var(--green);font-weight:950}
+h1{font-size:42px;line-height:1;margin:10px 0;font-weight:950;letter-spacing:-.04em}
+.hero-main{display:inline-block;background:rgba(4,17,31,.82);border:1px solid #ffffff22;border-radius:12px;padding:8px 12px;font-size:32px;font-weight:950}
+
+.pill{border-radius:999px;padding:6px 10px;font-weight:950;font-size:12px;background:#0b172d}
+.live{color:var(--green)}.upcoming{color:var(--orange)}.finished{color:#ff8094}
+
+.score-title{font-weight:950;margin-bottom:8px}
+.scoreboard{display:grid;gap:8px}
+.score-row{justify-content:space-between;gap:14px;border:1px solid #ffffff22;border-radius:14px;padding:10px 14px;background:linear-gradient(135deg,#ff007f88,#003dcb88)}
+.team-aus{background:linear-gradient(135deg,#ffcd00,#006847)!important}
+.team-ban{background:linear-gradient(135deg,#006a4e,#f42a41)!important}
+.team-eng{background:linear-gradient(135deg,#00247d,#cf142b)!important}
+.team-ind{background:linear-gradient(135deg,#ff8f1c,#1a2f8b)!important}
+.team-ire{background:linear-gradient(135deg,#169b62,#ff883e)!important}
+.team-nz{background:linear-gradient(135deg,#111,#777)!important}
+.team-ned{background:linear-gradient(135deg,#f36c21,#21468b)!important}
+.team-pak{background:linear-gradient(135deg,#006629,#00a651)!important}
+.team-sco{background:linear-gradient(135deg,#192f6b,#663399)!important}
+.team-sa{background:linear-gradient(135deg,#007749,#ffb81c)!important}
+.team-sl{background:linear-gradient(135deg,#0033a0,#ffb81c)!important}
+.team-wi{background:linear-gradient(135deg,#7a0019,#f6c344)!important}
+.score-row b,.score-row span{font-size:32px;font-weight:950;color:white}
+.score-row small{font-size:18px;font-weight:950;color:white}
+
+.stats{display:grid;gap:8px;margin-top:8px}
+.stat{justify-content:space-between;border:1px solid #ffffff22;border-radius:12px;padding:8px 12px;background:rgba(4,17,31,.82)}
+.stat small{font-size:20px;color:#cbd5e1;font-weight:950}
+.stat b{font-size:20px;text-align:right}
+
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.card{border:1px solid var(--line);border-radius:16px;background:rgba(4,17,31,.95);padding:12px 14px;min-height:74px}
+.card small{font-size:20px;color:var(--muted);font-weight:950;margin-right:10px}
+.card b{font-size:24px}
+.card.green{border-color:#00ff85;background:linear-gradient(135deg,#00ff8526,#04111f)}
+.card.blue{border-color:#2563ff;background:linear-gradient(135deg,#2563ff26,#04111f)}
+.card.orange{border-color:#ff7b00;background:linear-gradient(135deg,#ff7b0026,#04111f)}
+.card.red{border-color:#ff3b5c;background:linear-gradient(135deg,#ff3b5c26,#04111f)}
+.card.purple{border-color:#8b5cf6;background:linear-gradient(135deg,#8b5cf626,#04111f)}
+.card.pink{border-color:#ff007f;background:linear-gradient(135deg,#ff007f33,#04111f)}
+.card.blue-team{border-color:#003dcb;background:linear-gradient(135deg,#003dcb33,#04111f)}
+
+.panel{border:1px solid var(--line);border-radius:18px;background:rgba(4,17,31,.94);overflow:hidden}
+.panel-head{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.panel-title{font-size:30px;font-weight:950}
+.section{padding:12px 14px}
+.timer{justify-content:space-between;border:1px solid #00e5ff44;border-radius:14px;padding:10px 12px;margin-bottom:10px;background:#00e5ff12;position:relative}
+.timer:before{content:"COUNTDOWN";position:absolute;top:-9px;left:750px;background:#04111f;color:var(--red);font-size:20px;font-weight:950;padding:2px 6px;border-radius:999px;border:1px solid #00e5ff55}
+.timer small{color:var(--white);font-weight:950}.timer b{font-size:35px}.countdown{font-size:35px;color:var(--green);font-weight:950}
+.filters{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.filter{border:1px solid #1d4ed8;background:#071226;color:white;border-radius:10px;padding:8px 12px;font-weight:950;cursor:pointer}
+.filter.active{background:#1d4ed8}
+.match-list{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.match-row{justify-content:space-between;gap:14px;padding:10px 12px;border-bottom:1px solid var(--line);background:#03101d;cursor:pointer}
+.match-row:hover{background:#08203a}
+.match-row.active{background:#0b2a4a;border-left:2px solid var(--cyan)}
+.match-row:last-child{border-bottom:0}
+
+.stage-label{
+  font-size:26px;
+  font-weight:950;
+  color:var(--green);
+}
+
+.match-name{font-size:20px;font-weight:950}.match-status{font-size:15px;color:var(--muted);margin-top:4px}
+.footer{display:flex;justify-content:space-between;margin-top:8px;color:#94a3b8;font-size:13px}
+
+@media(max-width:900px){
+  .hero-grid,.cards{grid-template-columns:1fr}
+  h1{font-size:30px}.title{font-size:26px}
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">W</div>
+      <div><div class="title">Vipul's Women's World Cup Scoreboard</div><div class="subtitle">ICC Women's T20 World Cup 2026 &middot; Live data</div></div>
+    </div>
+    <div class="actions"><div class="status warn" id="apiStatus">● Loading</div><button class="btn" onclick="loadMatches()">↻ Refresh</button></div>
+  </div>
+
+  <div id="heroMount"></div>
+  <div id="commandMount"></div>
+  <div id="mainMount"></div>
+
+  <div class="footer"><div>Auto-refreshed every 5 seconds</div><div id="updatedAt">Updated: --</div></div>
+</div>
+
+<script>
+let allMatches = [];
+let activeFilter = "All";
+let selectedMatchId = "";
+let userSelected = false;
+const TOURNAMENT_CATEGORY = "Women's T20 World Cup";
+
+/* Retained only as an inert historical reference; live tournament data comes from the server. */
+const $ = id => document.getElementById(id);
+const stateOf = m => String(m?.state || "").trim();
+
+const teamShort = t => String(t || "")
+  .replace("Australia Women","AUS-W").replace("Bangladesh Women","BAN-W")
+  .replace("England Women","ENG-W").replace("India Women","IND-W")
+  .replace("Ireland Women","IRE-W").replace("New Zealand Women","NZ-W")
+  .replace("Netherlands Women","NED-W").replace("Pakistan Women","PAK-W")
+  .replace("Scotland Women","SCO-W").replace("South Africa Women","SA-W")
+  .replace("Sri Lanka Women","SL-W").replace("West Indies Women","WI-W");
+
+function teamClass(t){
+  t=String(t||"").toLowerCase();
+  if(t.includes("australia"))return"team-aus";
+  if(t.includes("bangladesh"))return"team-ban";
+  if(t.includes("england"))return"team-eng";
+  if(t.includes("india"))return"team-ind";
+  if(t.includes("ireland"))return"team-ire";
+  if(t.includes("new zealand"))return"team-nz";
+  if(t.includes("netherlands"))return"team-ned";
+  if(t.includes("pakistan"))return"team-pak";
+  if(t.includes("scotland"))return"team-sco";
+  if(t.includes("south africa"))return"team-sa";
+  if(t.includes("sri lanka"))return"team-sl";
+  if(t.includes("west indies"))return"team-wi";
+  return"";
+}
+
+function teamKey(m){
+  return (m?.teams || []).map(t => teamShort(t).toUpperCase()).sort().join("-");
+}
+
+function parseStartTime(m){
+  return new Date(m?.startISO || m?.dateTimeGMT || m?.date_start || m?.date_start_ist || 0);
+}
+
+function stageRank(m){
+  const x = String(m?.matchNo || m?.name || m?.status || m?.url || "").toLowerCase();
+
+  if(x.includes("final")) return 4;
+  if(x.includes("qualifier 2") || x.includes("qualifier-2")) return 3;
+  if(x.includes("eliminator")) return 2;
+  if(x.includes("qualifier 1") || x.includes("qualifier-1")) return 1;
+
+  return 0;
+}
+
+function matchPriority(m){
+  const st = stateOf(m);
+
+  if(st === "Live") return 1;
+  if(st === "Finished") return 2;
+  if(st === "Upcoming") return 3;
+
+  return 9;
+}
+
+function sortDashboardMatches(matches){
+  return [...matches].sort((a,b) => {
+    const p = matchPriority(a) - matchPriority(b);
+    if(p !== 0) return p;
+
+    if(stateOf(a) === "Finished" && stateOf(b) === "Finished"){
+      const aTime=parseStartTime(a).getTime(),bTime=parseStartTime(b).getTime();
+      if(Number.isFinite(aTime)&&Number.isFinite(bTime)&&aTime!==bTime)return bTime-aTime;
+      return stageRank(b) - stageRank(a);
+    }
+
+    if(stateOf(a) === "Upcoming" && stateOf(b) === "Upcoming"){
+      return parseStartTime(a) - parseStartTime(b);
+    }
+
+    return 0;
+  });
+}
+
+
+
+function getTournamentMatches(){
+  return sortDashboardMatches((allMatches || []).filter(m => m.category === TOURNAMENT_CATEGORY));
+}
+
+function getDisplayMatches(){
+  const matches=getTournamentMatches();
+  const live=matches.filter(m=>stateOf(m)==="Live");
+  const finished=matches.filter(m=>stateOf(m)==="Finished").slice(0,2);
+  const upcoming=matches.filter(m=>stateOf(m)==="Upcoming").slice(0,2);
+  const seen=new Set();
+  return [...live,...finished,...upcoming].filter(m=>{
+    const id=String(m.id);
+    if(seen.has(id))return false;
+    seen.add(id);
+    return true;
+  });
+}
+
+function getLiveMatch(){
+  return getTournamentMatches().find(m => stateOf(m) === "Live") || null;
+}
+
+function getUpcomingMatch(){
+  return getTournamentMatches()
+    .filter(m => stateOf(m) === "Upcoming")
+    .sort((a,b) => {
+      const aTime=parseStartTime(a).getTime(),bTime=parseStartTime(b).getTime();
+      if(Number.isFinite(aTime)&&Number.isFinite(bTime))return aTime-bTime;
+      if(Number.isFinite(aTime))return -1;
+      if(Number.isFinite(bTime))return 1;
+      return 0;
+    })[0] || null;
+}
+
+function getSelectedMatch(){
+  return getTournamentMatches().find(m => String(m.id) === String(selectedMatchId)) || null;
+}
+
+function getPrimaryMatch(){
+  const live = getLiveMatch();
+
+  if(live){
+    selectedMatchId = live.id;
+    userSelected = false;
+    return live;
+  }
+
+  if(userSelected){
+    const selected = getSelectedMatch();
+    if(selected) return selected;
+    userSelected = false;
+  }
+
+  const matches = getTournamentMatches();
+  const finished = matches.find(m => stateOf(m) === "Finished");
+  const upcoming = getUpcomingMatch();
+
+  const fallback = finished || upcoming || matches[0] || null;
+
+  if(fallback) selectedMatchId = fallback.id;
+  return fallback;
+}
+
+function getMatchNumber(m){
+  if(m?.matchNo) return m.matchNo;
+
+  const text = `${m?.name || ""} ${m?.status || ""} ${m?.url || ""}`.toLowerCase();
+  if(text.includes("qualifier-1") || text.includes("qualifier 1")) return "Qualifier 1";
+  if(text.includes("qualifier-2") || text.includes("qualifier 2")) return "Qualifier 2";
+  if(text.includes("eliminator")) return "Eliminator";
+  if(text.includes("final")) return "Final 2026";
+
+  return text.match(/\b(\d{1,3})(?:st|nd|rd|th)?[-\s]*match\b/i)?.[1] || "";
+}
+
+function countdown(m){
+  if(!m)return"No upcoming match found";
+  const start=parseStartTime(m).getTime();
+  if(!Number.isFinite(start))return"Start time awaiting API";
+  const d = start - Date.now();
+  if(d <= 0)return"Starting now / started";
+  const s=Math.floor(d/1000),h=Math.floor(s/3600),min=Math.floor((s%3600)/60),sec=s%60;
+  return `${h}h ${min}m ${sec}s`;
+}
+
+function upcomingStartLabel(match){
+  if(match?.startLabel)return match.startLabel;
+  const start=parseStartTime(match);
+  return Number.isFinite(start.getTime())
+    ? start.toLocaleString([], {dateStyle:"medium",timeStyle:"short"})
+    : "Time not supplied by API";
+}
+
+function badge(s){
+  const c=s==="Live"?"live":s==="Upcoming"?"upcoming":s==="Finished"?"finished":"";
+  return `<span class="pill ${c}">${s==="Live"?"● LIVE":s||"UNKNOWN"}</span>`;
+}
+
+function oversDec(o){
+  const p=String(o||"").replace(/ov/i,"").replace(/[()]/g,"").trim().split(".");
+  if(!p[0])return null;
+  return (parseInt(p[0],10)||0)+((parseInt(p[1]||"0",10)||0)/6);
+}
+
+function runs(score){
+  return parseInt(String(score||"").match(/(\d+)/)?.[1]||"NaN",10);
+}
+
+function calcRR(score,overs){
+  const r=runs(score),o=oversDec(overs);
+  return Number.isFinite(r)&&o?(r/o).toFixed(2):"";
+}
+
+function chaseText(t){
+  const s=String(t||"");
+  let m=s.match(/need\s+(\d+)\s+(?:runs?\s+)?(?:off|in)\s+(\d+)\s*b/i)||s.match(/need\s+(\d+)\s+runs?\s+in\s+(\d+)\s+balls?/i);
+  return m?{runs:+m[1],balls:+m[2]}:null;
+}
+
+function displayOvers(match,row){return row?.overs || ""}
+
+function currentScore(match){
+  const s=Array.isArray(match?.scores)?match.scores:[];
+  if(!s.length)return null;
+  return s.find(x=>Number.isFinite(oversDec(x?.overs))&&oversDec(x?.overs)<20)||s[s.length-1];
+}
+
+function innings(match){
+  if(stateOf(match)==="Upcoming")return 0;
+  const s=Array.isArray(match?.scores)?match.scores:[];
+  if(s.length>=2)return 2;
+  if(chaseText(match?.status)||chaseText(match?.rawText)||chaseText(match?.liveDetails?.chase))return 2;
+  return 1;
+}
+
+function currentRR(match){
+  const st=stateOf(match);
+  if(st==="Upcoming")return"Pre-match";
+  if(st==="Finished")return"Match Finished";
+
+  const apiRR=String(match?.liveDetails?.rr||"").trim();
+  if(apiRR)return apiRR;
+
+  const row=currentScore(match);
+  return row?.rr || calcRR(row?.score,displayOvers(match,row)) || "Innings not Started";
+}
+
+
+function oversToBalls(oversText) {
+  const [overs, balls = "0"] = String(oversText || "0").split(".");
+  return Number(overs) * 6 + Number(balls);
+}
+
+
+
+function requiredRR(match){
+  const st = stateOf(match);
+  if(st === "Upcoming") return "Pre-match";
+
+  if(st === "Finished") return "Match Finished";
+
+  const status = String(match?.status || "").trim();
+  const lower = status.toLowerCase();
+  const ld = match?.liveDetails || {};
+
+  if(lower.includes("innings break")){
+    return "Chase not started";
+  }
+
+  const scores = Array.isArray(match?.scores) ? match.scores : [];
+  if(scores.length < 2) return "Second innings yet to start";
+
+  // 1. Use liveDetails.requiredRR if clean
+  const apiRR = String(ld.requiredRR || "").trim();
+  if(apiRR && apiRR !== "First innings"){
+    return apiRR;
+  }
+
+  // 2. Use liveDetails.chase / simpleSituation only if status is not contradictory
+  const liveText = String(ld.chase || ld.simpleSituation || "").trim();
+
+  let m = liveText.match(/need\s+(\d+)\s+(?:runs?\s+)?(?:off|in)\s+(\d+)\s*b/i);
+  if(m && !lower.includes("to win")){
+    const runsNeeded = parseInt(m[1], 10);
+    const ballsLeft = parseInt(m[2], 10);
+    return ((runsNeeded * 6) / ballsLeft).toFixed(2);
+  }
+
+// 3. If status says "Need X to win", use current batting innings overs
+m = status.match(/need\s+(\d+)\s+to\s+win/i);
+
+if (m) {
+  const runsNeeded = parseInt(m[1], 10);
+
+  // Current batting/chasing team is usually first score in live chase
+  const chasing = scores[0];
+
+  const ballsBowled = oversToBalls(displayOvers(match, chasing));
+  const ballsLeft = Math.max(120 - ballsBowled, 0);
+
+  if (ballsLeft > 0) {
+    return ((runsNeeded * 6) / ballsLeft).toFixed(2);
+  }
+}
+
+  return "Not available";
+}
+function isInningsBreak(match){
+  return String(match?.status || "").toLowerCase().includes("innings break");
+}
+
+function recent(match){
+  const st=stateOf(match);
+
+  if(st==="Finished")return["Match Finished","blue"];
+  if(st==="Upcoming")return["Waiting","blue"];
+
+  const lastFive=String(match?.liveDetails?.lastFive||"").trim();
+
+  if(isInningsBreak(match)){
+    return [lastFive ? `1st innings done · Last 5: ${lastFive}` : "1st innings done", "green"];
+  }
+
+  if(lastFive)return[lastFive,"green"];
+
+  const row=currentScore(match),over=displayOvers(match,row),rr=currentRR(match);
+  if(over && rr && rr!=="--")return[`${over} ov · RR ${rr}`,"blue"];
+  return["Live feed warming up","blue"];
+}
+
+
+function phase(match){
+  const st=stateOf(match);
+
+  if(st==="Finished")return["Match Finished","purple"];
+  if(st==="Upcoming")return["Pre-match","blue"];
+
+  if(isInningsBreak(match)){
+    return ["Innings Break","orange"];
+  }
+
+  const o=oversDec(displayOvers(match,currentScore(match)));
+  if(!Number.isFinite(o))return["Live","blue"];
+  if(o<6)return["Powerplay","orange"];
+  if(o<15)return["Middle Overs","blue"];
+  return["Death Overs","red"];
+}
+
+
+function momentum(match){
+  const st=stateOf(match);
+
+  if(st==="Finished")return["Result declared","purple"];
+  if(st==="Upcoming")return["Waiting","blue"];
+
+  if(isInningsBreak(match)){
+    return ["Waiting for chase","blue"];
+  }
+
+  const c=parseFloat(currentRR(match)),r=parseFloat(requiredRR(match));
+
+  if(innings(match)>=2 && Number.isFinite(c) && Number.isFinite(r)){
+    if(c>r)return["Batting Side","pink"];
+    if(r>c+1.5)return["Bowling Side","blue-team"];
+    return["In Balance","blue"];
+  }
+
+  if(Number.isFinite(c)){
+    if(c>=11)return["Batting Side","pink"];
+    if(c>=9)return["Neutral","blue"];
+    return["Bowling Side","blue-team"];
+  }
+
+  return["Neutral","blue"];
+}
+
+function scoreHTML(match){
+  const teams=Array.isArray(match?.teams)?match.teams:[];
+  if(!teams.length){
+    return `<div class="score-row"><b>Score</b><span>${match?.score||"Score not available"}</span></div>`;
+  }
+
+  return teams.map(t=>{
+    const short=teamShort(t),cls=teamClass(t);
+    const normaliseTeam=value=>String(value||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    const row=(match?.scores||[]).find(s=>[
+      normaliseTeam(short), normaliseTeam(t)
+    ].includes(normaliseTeam(s.team)));
+
+    if(stateOf(match)==="Upcoming"){
+      return `<div class="score-row ${cls}"><b>${short}</b><span>Match not started</span><small>Pre-match</small></div>`;
+    }
+
+    return row
+      ? `<div class="score-row ${cls}"><b>${short}</b><span>${row.score}</span><small>${displayOvers(match,row)||"--"} ov</small></div>`
+      : `<div class="score-row ${cls}"><b>${short}</b><span>Innings not started</span><small>Yet to bat</small></div>`;
+  }).join("");
+}
+
+function displaySituation(match){
+  const status = String(match?.status || "").trim();
+
+  let m = status.match(/need\s+(\d+)\s+off\s+(\d+)b/i);
+  if(m){
+    return `${m[1]} needed from ${m[2]} balls`;
+  }
+
+  m = status.match(/need\s+(\d+)\s+to\s+win/i);
+  if(m){
+    return `${m[1]} needed to win`;
+  }
+
+  return status || "--";
+}
+
+
+function matchSituationText(match){
+  const st = stateOf(match);
+
+  if(st === "Upcoming") return "Pre-match";
+  if(st === "Finished") return match?.status || "Match finished";
+
+  if(innings(match) <= 1){
+    const row = currentScore(match);
+    return `${row?.team || "Batting side"} batting first`;
+  }
+
+  return displaySituation(match);
+}
+
+
+function stageLabelHtml(m){
+  const stage = getMatchNumber(m);
+  return stage ? `<span class="stage-label">${stage}:</span>` : "";
+}
+
+
+
+function renderHero(match){
+const no=getMatchNumber(match),st=stateOf(match),heading=st==="Upcoming"?"PRE-MATCH":st==="Finished"?"FINAL SCORES":"LIVE SCORES";
+
+  $("heroMount").innerHTML=`<div class="hero"><div class="hero-grid">
+    <div class="hero-left">
+      <div class="eyebrow">${no||"Match"} · ${st||"--"}</div>
+      <h1>${match?.name||"No match found"}</h1>
+<div class="hero-main">${displaySituation(match)}</div>
+
+    </div>
+    <div class="hero-right">
+      <div class="score-title">${heading}</div>
+      <div class="scoreboard">${scoreHTML(match)}</div>
+      <div class="stats">
+<div class="stat"><small>Situation</small><b>${matchSituationText(match)}</b></div>
+        <div class="stat"><small>Current RR</small><b>${currentRR(match)}</b></div>
+        <div class="stat"><small>Required RR</small><b>${requiredRR(match)}</b></div>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+
+function winPredictor(match){
+  const st = stateOf(match);
+  const teams = Array.isArray(match?.teams) ? match.teams.map(teamShort) : [];
+  const scores = Array.isArray(match?.scores) ? match.scores : [];
+
+  if(st === "Upcoming") return ["Pre-match", "blue"];
+
+  if(st === "Finished"){
+    const status = String(match?.status || "");
+    const fullWinner = (match?.teams || []).find(t => status.toUpperCase().includes(String(t).toUpperCase()));
+    const winner = fullWinner ? teamShort(fullWinner) : "Winner";
+    return [`${winner} 100%`, "purple"];
+  }
+
+  if(!scores.length || teams.length < 2) return ["Not enough data", "blue"];
+
+  // ---------- FIRST INNINGS MODEL ----------
+  if(scores.length < 2 || innings(match) <= 1){
+    const bat = scores[0];
+    const batTeam = bat?.team || teams[0];
+    const bowlTeam = teams.find(t => t !== batTeam) || teams[1];
+
+    const r = runs(bat?.score);
+    const o = oversDec(bat?.overs);
+    const w = parseInt(String(bat?.score || "").match(/\/(\d+)/)?.[1] || "0", 10);
+
+    if(!Number.isFinite(r) || !Number.isFinite(o) || o <= 0){
+      return ["Building...", "blue"];
+    }
+
+    const projected = (r / o) * 20;
+
+    let battingPct = 50;
+
+    if(projected >= 240) battingPct = 80;
+    else if(projected >= 220) battingPct = 72;
+    else if(projected >= 200) battingPct = 64;
+    else if(projected >= 180) battingPct = 58;
+    else if(projected >= 160) battingPct = 48;
+    else if(projected >= 140) battingPct = 40;
+    else battingPct = 32;
+
+    battingPct -= Math.max(0, w - 1) * 2.5;
+
+    if(o >= 15 && w <= 4 && projected >= 190) battingPct += 5;
+    if(o >= 15 && w >= 9) battingPct -= 6;
+
+    battingPct = Math.max(10, Math.min(82, Math.round(battingPct)));
+
+    return [
+      `${batTeam} ${battingPct}% · ${bowlTeam} ${100 - battingPct}%`,
+      battingPct >= 55 ? "pink" : "blue-team"
+    ];
+  }
+
+  // ---------- SECOND INNINGS CHASE MODEL ----------
+  const scoreA = scores[0];
+  const scoreB = scores[1];
+
+  const oversA = oversDec(scoreA?.overs);
+  const oversB = oversDec(scoreB?.overs);
+
+  let chase = scoreA;
+  let defend = scoreB;
+
+  // Detect chasing innings safely.
+  // In live chase, current/chasing innings usually has overs below 20.
+  // Completed first innings usually has 20 overs.
+  if(Number.isFinite(oversA) && Number.isFinite(oversB)){
+    if(oversA >= 20 && oversB < 20){
+      defend = scoreA;
+      chase = scoreB;
+    } else if(oversB >= 20 && oversA < 20){
+      defend = scoreB;
+      chase = scoreA;
+    }
+  }
+
+  const chaseTeam = chase?.team || teams[1];
+  const defendTeam = defend?.team || teams.find(t => t !== chaseTeam) || teams[0];
+
+  const defendRuns = runs(defend?.score);
+  const chaseRuns = runs(chase?.score);
+  const chaseOvers = oversDec(chase?.overs);
+  const wicketsLost = parseInt(String(chase?.score || "").match(/\/(\d+)/)?.[1] || "0", 10);
+
+  if(
+    !Number.isFinite(defendRuns) ||
+    !Number.isFinite(chaseRuns) ||
+    !Number.isFinite(chaseOvers)
+  ){
+    return ["Not enough data", "blue"];
+  }
+
+  const target = defendRuns + 1;
+  const runsNeeded = Math.max(target - chaseRuns, 0);
+  const ballsBowled = oversToBalls(chase?.overs);
+  const ballsLeft = Math.max(120 - ballsBowled, 0);
+  const wicketsLeft = Math.max(10 - wicketsLost, 0);
+
+  if(runsNeeded <= 0){
+    return [`${chaseTeam} 100% · ${defendTeam} 0%`, "pink"];
+  }
+
+  if(ballsLeft <= 0 || wicketsLeft <= 0){
+    return [`${defendTeam} 100% · ${chaseTeam} 0%`, "blue-team"];
+  }
+
+  const crr = chaseOvers > 0 ? chaseRuns / chaseOvers : 0;
+  const rrr = (runsNeeded * 6) / ballsLeft;
+
+  let chasePct = 50;
+
+  // Run-rate equation
+  chasePct += (crr - rrr) * 10;
+
+  // Wickets remaining
+  chasePct += (wicketsLeft - 7) * 15;
+
+  // End-over pressure
+  if(ballsLeft <= 12) chasePct -= 8;
+  else if(ballsLeft <= 24) chasePct -= 5;
+  else if(ballsLeft <= 36) chasePct -= 2;
+
+  // Required-rate pressure
+  if(rrr <= 6) chasePct += 12;
+  else if(rrr <= 8) chasePct += 6;
+  else if(rrr >= 14) chasePct -= 12;
+  else if(rrr >= 12) chasePct -= 7;
+  else if(rrr >= 10) chasePct -= 3;
+
+  // Wickets collapse penalty
+  if(wicketsLost >= 7) chasePct -= 14;
+  else if(wicketsLost >= 6) chasePct -= 9;
+  else if(wicketsLost >= 5) chasePct -= 5;
+
+  // Near-target boost
+  if(runsNeeded <= 20 && ballsLeft >= 12) chasePct += 10;
+  if(runsNeeded <= 10 && wicketsLeft >= 3) chasePct += 15;
+
+  chasePct = Math.max(5, Math.min(99.5, Math.round(chasePct)));
+
+  return [
+    `${chaseTeam} ${chasePct}% · ${defendTeam} ${100 - chasePct}%`,
+    chasePct >= 55 ? "pink" : "blue-team"
+  ];
+}
+
+function renderCards(match){
+const r=recent(match),p=phase(match),m=momentum(match),w=winPredictor(match);
+  $("commandMount").innerHTML=`<div class="cards">
+    <div class="card ${r[1]}"><small>Momentum/Last 5 Overs: </small><b>${r[0]}</b></div>
+    <div class="card ${p[1]}"><small>Match Phase: </small><b>${p[0]}</b></div>
+    <div class="card ${m[1]}"><small>Currently ahead: </small><b>${m[0]}</b></div>
+<div class="card ${w[1]}"><small>Win Predictor: </small><b>${w[0]}</b></div>
+  </div>`;
+}
+
+function selectMatch(id){
+  selectedMatchId=id;
+  userSelected=true;
+  renderPage();
+}
+
+function setFilter(filter){
+  activeFilter=filter;
+  renderPage();
+}
+
+function renderMain(){
+  const upcoming=getUpcomingMatch(),filters=["All","Live","Upcoming","Finished"];
+  let matches=getDisplayMatches();
+
+  if(activeFilter!=="All"){
+    matches=matches.filter(m=>stateOf(m)===activeFilter);
+  }
+
+  $("mainMount").innerHTML=`<div class="panel"><div class="panel-head"><div class="panel-title">Recent & Upcoming</div></div><div class="section">
+    <div class="timer">
+  <div>
+    <b>${upcoming?.name||"No upcoming Women's World Cup match found"}</b>
+    <div class="match-status">${upcoming?`${getMatchNumber(upcoming)||"--"} · ${upcomingStartLabel(upcoming)}`:""}</div>
+  </div>
+
+  <div class="timer-right">
+    <small>Next Match Starts in: </small>
+    <div class="countdown">${countdown(upcoming)}</div>
+  </div>
+</div>
+
+    <div class="filters">${filters.map(f=>`<button class="filter ${activeFilter===f?"active":""}" onclick="setFilter('${f}')">${f}</button>`).join("")}</div>
+
+    <div class="match-list">${matches.map(m=>`<div class="match-row ${String(m.id)===String(selectedMatchId)?"active":""}" onclick="selectMatch('${m.id}')">
+      <div>
+
+<div class="match-name">${stageLabelHtml(m)} ${m.name}</div>
+        <div class="match-status">${m.status||m.score||"--"}</div>
+      </div>
+      ${badge(stateOf(m))}
+    </div>`).join("") || `<div class="match-row"><div>No matches found</div></div>`}</div>
+  </div></div>`;
+}
+
+function renderPage(){
+  const match=getPrimaryMatch();
+
+  if(!match){
+    $("heroMount").innerHTML="";
+    $("commandMount").innerHTML="";
+    $("mainMount").innerHTML=`<div class="panel"><div class="section">No Women's World Cup match found.</div></div>`;
+    return;
+  }
+
+  renderHero(match);
+  renderCards(match);
+  renderMain();
+}
+
+async function loadMatches(){
+  const s=$("apiStatus");
+  s.textContent="● Loading";
+  s.className="status warn";
+
+  try{
+    const apiBase = location.protocol === "file:" ? "http://localhost:3001" : "";
+    const res=await fetch(apiBase+"/api/womens-t20-world-cup?t="+Date.now(),{cache:"no-store"});
+    if(!res.ok) throw new Error(`Match service returned ${res.status}`);
+    const json=await res.json();
+
+    allMatches=json.data||[];
+
+    const live=getLiveMatch();
+    const selectedStillExists=getTournamentMatches().some(m=>String(m.id)===String(selectedMatchId));
+
+    if(!selectedStillExists){
+      selectedMatchId="";
+      userSelected=false;
+    }
+
+    if(live && !userSelected){
+      selectedMatchId=live.id;
+    }
+
+    s.textContent=live?"● LIVE":"● CONNECTED";
+    s.className="status";
+    $("updatedAt").textContent="Updated: "+new Date().toLocaleTimeString();
+
+    renderPage();
+  }catch(e){
+    s.textContent="● ERROR";
+    s.className="status bad";
+    $("mainMount").innerHTML=`<div class="panel"><div class="section"><b>Women's match service is not running.</b><br>Start <code>server-womens.js</code>, then refresh this page.</div></div>`;
+    console.error(e);
+  }
+}
+
+loadMatches();
+setInterval(renderPage,1000);
+setInterval(loadMatches,5000);
+</script>
+</body>
+</html>
