@@ -1,7 +1,8 @@
 ﻿# CTC Simplifier
 
-Fast public version for Render Static Sites.
+This repo supports two deploy modes:
 
-- Public deploy serves `index.html` only, so it does not cold-start a Python server.
-- DOCX auto-read remains available in the local desktop launcher, where `server.py` runs locally.
-- On the public page, enter or confirm salary values manually.
+1. Existing Python web service fallback from the repo root.
+2. Fast Render Static Site from `static-site/`.
+
+Use the Static Site version to avoid Render free web-service cold starts. DOCX auto-read remains available in the local desktop launcher where `server.py` runs locally. On the public page, enter or confirm salary values manually.
