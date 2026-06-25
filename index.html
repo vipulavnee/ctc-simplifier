@@ -2536,6 +2536,7 @@
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ];
     const allowedExtensions = [".docx"];
+    const isPublicStaticPage = /(^|\.)onrender\.com$/i.test(window.location.hostname);
 
     function setUploadStatus(message, isError = false) {
       uploadStatus.textContent = message;
@@ -2708,6 +2709,12 @@
     }
 
     async function extractFromUploadedFile(file, fileExtension) {
+      if (isPublicStaticPage) {
+        resetUploadedInfo("Public fast version: DOCX auto-read works in the desktop launcher. Enter or confirm values manually here.");
+        calculate();
+        return "Fast public version loaded. DOCX auto-read is available in the desktop CTC launcher; on this public page, enter or confirm salary values manually.";
+      }
+
       const formData = new FormData();
       formData.append("file", file);
 

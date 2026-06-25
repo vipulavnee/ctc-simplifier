@@ -1,0 +1,6 @@
+﻿services:
+  - type: web
+    name: ctc-simplifier-static
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
