@@ -1387,7 +1387,7 @@
                 <label>Annual One-time / Off-cycle / Variable Pay
                   <input id="variable" type="text" inputmode="numeric" placeholder="fully taxable">
                 </label>
-                <label>Other Tax-Free Component Monthly <span class="optional-text">(optional)</span>
+                <label>Other Tax-Free Component Monthly <span class="optional-text">(optional · old regime only)</span>
                   <input id="otherTaxFreeMonthly" type="text" inputmode="numeric" placeholder="e.g. 10,000">
                 </label>
               </div>
@@ -2380,7 +2380,7 @@
       const professionalTaxAnnual = statutoryContributions.professionalTaxAnnual;
       const newEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "new");
       const oldEmployerNpsTax = employerNpsTaxTreatment(employerNpsAnnual, annualBasic, "old");
-      const newTaxableIncome = Math.max(0, annualGross + newEmployerNpsTax.taxableExcess - 75000 - otherTaxFreeAnnual);
+      const newTaxableIncome = Math.max(0, annualGross + newEmployerNpsTax.taxableExcess - 75000);
       const oldTaxableIncome = Math.max(0,
         annualGross + oldEmployerNpsTax.taxableExcess - 50000 - otherTaxFreeAnnual - professionalTaxAnnual - hraExemption -
         old80cDeduction - personalNpsDeduction - medical80dDeduction -
@@ -2449,7 +2449,7 @@
       output.summaryPtFrequency.textContent = statutoryContributions.ptFrequency;
       output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
-      output.summaryOtherTaxFreeAnnual.textContent = money(otherTaxFreeAnnual);
+      output.summaryOtherTaxFreeAnnual.textContent = money(appliedRegime === "old" ? otherTaxFreeAnnual : 0);
       output.summaryPtDeduction.textContent = money(appliedRegime === "old" ? professionalTaxAnnual : 0);
       output.summaryHraExemption.textContent = money(appliedRegime === "old" ? hraExemption : 0);
       output.summary80cDeduction.textContent = money(appliedRegime === "old" ? old80cDeduction : 0);
