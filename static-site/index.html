@@ -1228,7 +1228,6 @@
   <main class="shell">
     <header>
       <div class="brand">
-        <div class="mark">SD</div>
         <div>
           <h2>Salary Decoder</h2>
           <p>CTC to actual in-hand</p>
@@ -1242,12 +1241,12 @@
 
     <section class="intro">
       <div>
-        <h1>CTC ≠ Monthly In-Hand Salary</h1>
+        <h1>CTC is not equal to take home salary</h1>
         <p class="blink-text">Most employees overestimate their salary by assuming CTC ÷ 12.</p>
         <span class="tagline">CTC → In-Hand → Reality Check</span>
       </div>
       <div class="hero-result">
-        <span>Think your salary is CTC ÷ 12?</span>
+        <span>Think your monthly in hand salary is CTC/12?</span>
         <strong>You may be in for a surprise.</strong>
       </div>
     </section>
@@ -1305,7 +1304,7 @@
             </label>
             <div class="static-field">
               <span>Financial Year</span>
-              <strong>FY 2025-26</strong>
+              <strong>FY 2026-27</strong>
             </div>
             <label class="breakup-field">Gross Monthly
               <input id="grossMonthlyInput" type="text" inputmode="numeric" placeholder="e.g. 1,82,400">
@@ -2447,7 +2446,7 @@
       output.summaryVariableAnnual.textContent = money(variableAnnual);
       output.summaryProfessionalTaxAnnual.textContent = money(statutoryContributions.professionalTaxAnnual);
       output.summaryPtFrequency.textContent = statutoryContributions.ptFrequency;
-      output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2025-26`;
+      output.summaryTaxRegime.textContent = `${appliedRegime === "old" ? "Old" : "New"} regime · FY 2026-27`;
       output.summaryStandardDeduction.textContent = money(appliedRegime === "old" ? 50000 : 75000);
       output.summaryOtherTaxFreeAnnual.textContent = money(appliedRegime === "old" ? otherTaxFreeAnnual : 0);
       output.summaryPtDeduction.textContent = money(appliedRegime === "old" ? professionalTaxAnnual : 0);
