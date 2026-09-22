@@ -1568,6 +1568,7 @@
                 <div class="line-item"><span>Gross monthly</span><strong id="grossMonthly">₹0</strong></div>
                 <div class="line-item"><span>Employee PF monthly</span><strong id="employeePfMonthly">₹0</strong></div>
                 <div class="line-item"><span>Professional tax monthly equivalent</span><strong id="professionalTaxMonthly">₹0</strong></div>
+                <div class="line-item"><span>Employee LWF monthly equivalent</span><strong id="employeeLwfMonthly">₹0</strong></div>
                 <div class="line-item"><span>Average monthly TDS</span><strong id="tdsMonthly">₹0</strong></div>
                 <div class="line-item"><span>Employee ESIC monthly</span><strong id="esicMonthly">₹0</strong></div>
                 <div class="line-item take-home-line"><span>Monthly in-hand (take home)</span><strong id="summaryMonthlyInHand">₹0</strong></div>
@@ -1660,6 +1661,7 @@
       grossMonthly: document.getElementById("grossMonthly"),
       employeePfMonthly: document.getElementById("employeePfMonthly"),
       professionalTaxMonthly: document.getElementById("professionalTaxMonthly"),
+      employeeLwfMonthly: document.getElementById("employeeLwfMonthly"),
       tdsMonthly: document.getElementById("tdsMonthly"),
       esicMonthly: document.getElementById("esicMonthly"),
       taxableIncome: document.getElementById("taxableIncome"),
@@ -2226,6 +2228,7 @@
       output.grossMonthly.textContent = "₹0";
       output.employeePfMonthly.textContent = "₹0";
       output.professionalTaxMonthly.textContent = "₹0";
+      output.employeeLwfMonthly.textContent = "₹0";
       output.tdsMonthly.textContent = "₹0";
       output.esicMonthly.textContent = "₹0";
       output.taxableIncome.textContent = "₹0";
@@ -2368,6 +2371,7 @@
       const employerEsicAnnual = employerEsicMonthly * 12;
       const statutoryContributions = statutoryContributionsForState(fields.stateTax.value);
       const professionalTaxMonthly = statutoryContributions.professionalTaxMonthly;
+      const employeeLwfMonthly = statutoryContributions.employeeLwfDeductionAnnual / 12;
       const otherTaxFreeAnnual = otherTaxFreeMonthly * 12;
       const useAdditionalOldDeductions = fields.oldDeductionsChoice.value === "true";
       const hraExemption = calculateHraExemption(annualBasic);
@@ -2398,7 +2402,7 @@
       const taxAnnual = appliedTaxResult.annualTax;
       const tdsMonthly = taxAnnual / 12;
       const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
-      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - tdsMonthly - esicMonthly;
+      const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - employeeLwfMonthly - tdsMonthly - esicMonthly;
       const annualInHand = monthlyInHand * 12 + variableAnnual;
       const ctcMonthlyAssumption = ctc / 12;
       const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
@@ -2425,6 +2429,7 @@
       output.employeePfMonthly.textContent = money(employeePfMonthly);
       if (output.employerNpsMonthlyOutput) output.employerNpsMonthlyOutput.textContent = money(employerNpsMonthly);
       output.professionalTaxMonthly.textContent = money(professionalTaxMonthly);
+      output.employeeLwfMonthly.textContent = money(employeeLwfMonthly);
       output.tdsMonthly.textContent = money(tdsMonthly);
       output.esicMonthly.textContent = money(esicMonthly);
       output.taxableIncome.textContent = money(taxableIncome);
