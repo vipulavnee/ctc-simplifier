@@ -1600,6 +1600,18 @@
     <footer>Built by <span class="vipul-name">Vipul Sharma</span> | HR &amp; Compensation Specialist</footer>
   </main>
 
+  <dialog id="uploadReviewDialog" aria-labelledby="uploadReviewTitle" style="width:min(540px, calc(100% - 32px));max-height:85vh;overflow:auto;border:1px solid #b6c8ce;border-radius:8px;padding:20px;">
+    <h2 id="uploadReviewTitle" style="font-size:20px;">Confirm salary amounts</h2>
+    <p id="uploadReviewFile"></p>
+    <div id="uploadReviewWarnings" role="status"></div>
+    <div id="uploadReviewFields" class="form-grid"></div>
+    <p id="uploadReviewError" role="alert"></p>
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn primary" id="confirmUploadBtn" type="button">Use these amounts</button>
+      <button class="btn secondary" id="cancelUploadBtn" type="button">Cancel</button>
+    </div>
+  </dialog>
+
   <script>
     const rupee = new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -1740,6 +1752,8 @@
     let lastUploadRead = null;
     let inputMode = "detailed";
     let hasTriedCalculate = false;
+    let uploadRevision = 0;
+    let pendingUpload = null;
 
     function missingCompulsoryInputs() {
       const missing = [];
@@ -1766,12 +1780,14 @@
 
     function updateCalculateButtonState() {
       const missing = missingCompulsoryInputs();
-      const isReady = missing.length === 0;
+      const ctc = readNumber(fields.ctc);
+      const invalid = getInputFlags(0, readNumber(fields.basic) || ctc * 0.5 / 12, ctc).filter(flag => flag.startsWith("Invalid"));
+      const isReady = missing.length === 0 && invalid.length === 0;
 
       calculateBtn.classList.toggle("ready", isReady);
       calculateBtn.title = isReady
         ? "Ready to calculate"
-        : `Missing: ${missing.join(", ")}`;
+        : [...missing, ...invalid].join(", ");
     }
 
     function taxRegimeLabel(regime) {
@@ -1817,7 +1833,11 @@
     }
 
     function readNumber(input) {
-      return Math.max(0, Number(String(input.value || 0).replace(/[^\d.]/g, "")));
+      const value = String(input.value || "").trim();
+      if (!value) return 0;
+      if (!/^(?:\d+|\d{1,3}(?:,\d{3})+|\d{1,2}(?:,\d{2})*,\d{3})(?:\.\d+)?$/.test(value)) return NaN;
+      const number = Number(value.replace(/,/g, ""));
+      return Number.isFinite(number) ? number : NaN;
     }
 
     function plainIndianNumber(value) {
@@ -1926,6 +1946,18 @@
 
       if (missing.length > 0) flags.push(`Please fill compulsory details: ${missing.join(", ")}.`);
       const annualBasic = basicForCalculation * 12;
+      Object.values(fields).filter((field) => field && field.type === "text").forEach((field) => {
+        if (!Number.isFinite(readNumber(field))) flags.push(`Invalid amount: ${field.closest("label").textContent.trim().split("\n")[0]}. Enter a non-negative number.`);
+      });
+      if (ctcForCalculation > 0 && annualBasic > ctcForCalculation) flags.push("Invalid salary: annual Basic cannot exceed annual CTC.");
+      const contributions = (fields.employerPfIncluded.value === "true" ? employeePfForBasis(basicForCalculation, fields.pfBasis.value) * 12 : 0)
+        + readNumber(fields.npsMonthly) * 12
+        + (fields.gratuityMentioned.value === "true" ? annualBasic * 0.0481 : 0);
+      if (ctcForCalculation > 0 && contributions >= ctcForCalculation) flags.push("Invalid salary: employer contributions must leave a positive gross salary within CTC.");
+      const availableGross = readNumber(fields.grossMonthlyInput) > 0 ? readNumber(fields.grossMonthlyInput) * 12 : ctcForCalculation - contributions;
+      if (ctcForCalculation > 0 && readNumber(fields.grossMonthlyInput) > 0 && availableGross + contributions > ctcForCalculation + 1) flags.push("Invalid salary: annual gross and included employer contributions cannot exceed CTC.");
+      if (ctcForCalculation > 0 && annualBasic > availableGross + 1) flags.push("Invalid salary: annual Basic cannot exceed annual gross salary.");
+      if (variableMonthlyFromInput() * 12 > availableGross) flags.push("Invalid salary: annual variable pay cannot exceed annual gross salary.");
       if (fields.stateTax.value === "DEFAULT") flags.push("Other/default state selected, so default PT is being used.");
 
       return flags;
@@ -1933,6 +1965,7 @@
 
     function showInputErrors(flags) {
       const blockingFlags = flags.filter((flag) =>
+        flag.startsWith("Invalid") ||
         flag.includes("missing") ||
         flag.includes("Please fill") ||
         flag.includes("Please answer") ||
@@ -1978,6 +2011,10 @@
     }
 
     function resetCalculator() {
+      uploadRevision++;
+      pendingUpload = null;
+      const review = document.getElementById("uploadReviewDialog");
+      if (review.open) review.close();
       [fields.ctc, fields.basic, fields.hra, fields.grossMonthlyInput, fields.variable, fields.npsMonthly, fields.otherTaxFreeMonthly, fields.conveyance, fields.other80cAnnual, fields.personalNpsAnnual, fields.medical80dAnnual, fields.homeLoanInterestAnnual, fields.otherOldDeductionsAnnual, fields.rentPaidMonthly].filter(Boolean).forEach((field) => {
         field.value = "";
       });
@@ -2023,7 +2060,7 @@
         return;
       }
 
-      input.value = plainIndianNumber(readNumber(input));
+      if (Number.isFinite(readNumber(input))) input.value = plainIndianNumber(readNumber(input));
     }
 
     function newRegimeBaseTax(income) {
@@ -2299,7 +2336,9 @@
       const grossMonthly = statedGrossMonthly || (basic + hra + conveyance + variable);
       renderCurrentInputData({ ctc, basic, hra, variable, grossMonthly, npsMonthly: employerNpsMonthly, otherTaxFreeMonthly });
       const inputFlags = getInputFlags(grossMonthly, basic, ctc);
-      const hasBlockingFlags = showErrors ? showInputErrors(inputFlags) : inputFlags.some((flag) =>
+      const hasInvalidAmounts = inputFlags.some(flag => flag.startsWith("Invalid"));
+      const hasBlockingFlags = (showErrors || hasInvalidAmounts) ? showInputErrors(inputFlags) : inputFlags.some((flag) =>
+        flag.startsWith("Invalid") ||
         flag.includes("missing") ||
         flag.includes("Please fill") ||
         flag.includes("Please answer") ||
@@ -2307,7 +2346,7 @@
         flag.includes("Open Advanced Options")
       );
 
-      if (!showErrors) {
+      if (!showErrors && !hasInvalidAmounts) {
         output.inputErrorBox.style.display = "none";
         output.inputErrorBox.textContent = "";
       }
@@ -2599,7 +2638,7 @@
     function extractSalaryFields(text) {
       const cleanText = text.replace(/\s+/g, " ");
 
-      return {
+      const extracted = {
         ctc: findSalaryAmount(cleanText, ["\\bctc\\b", "cost\\s+to\\s+company", "total\\s+compensation"]),
         basic: findSalaryAmount(cleanText, ["\\bbasic\\b", "basic\\s+salary", "basic\\s+pay"]),
         hra: findSalaryAmount(cleanText, ["\\bhra\\b", "house\\s+rent\\s+allowance"]),
@@ -2608,9 +2647,38 @@
         conveyance: findSalaryAmount(cleanText, ["conveyance", "conveyance\\s+allowance"]),
         variable: findSalaryAmount(cleanText, ["variable\\s+pay", "performance\\s+bonus", "bonus"]),
         employerPf: findSalaryAmount(cleanText, ["employer\\s+pf", "employer\\s+provident\\s+fund", "company\\s+pf"]),
-        gratuityMentioned: /gratuity/i.test(cleanText),
-        state: (cleanText.match(/\\b(Karnataka|Delhi|Maharashtra|Tamil Nadu|Gujarat|Telangana|Haryana|West Bengal|Uttar Pradesh|Punjab|Rajasthan|Andhra Pradesh|Bangalore)\\b/i) || [])[1]
+        gratuityMentioned: /gratuity/i.test(cleanText) ? !/gratuity\s*(?:is\s*)?(?:not\s+included|excluded|:\s*(?:no|0)\b)/i.test(cleanText) : null,
+        state: (cleanText.match(/\b(Karnataka|Delhi|Maharashtra|Tamil Nadu|Gujarat|Telangana|Haryana|West Bengal|Uttar Pradesh|Punjab|Rajasthan|Andhra Pradesh|Bangalore)\b/i) || [])[1]
       };
+      extracted.warnings = [];
+      const labels = { ctc: "ctc|cost\\s+to\\s+company|total\\s+compensation", basic: "basic(?:\\s+(?:salary|pay))?", hra: "hra|house\\s+rent\\s+allowance", grossMonthly: "gross(?:\\s+monthly)?|monthly\\s+earnings", conveyance: "conveyance(?:\\s+allowance)?", variable: "variable\\s+pay|performance\\s+bonus|bonus" };
+      const boundary = Object.values(labels).join("|") + "|employer\\s+pf|gratuity";
+      for (const [key, label] of Object.entries(labels)) {
+        const match = new RegExp(`(?:\\b(annual|yearly|monthly)\\s+)?\\b(?:${label})\\b([\\s\\S]*?)(?=\\b(?:(?:annual|yearly|monthly)\\s+)?(?:${boundary})\\b|$)`, "i").exec(text);
+        if (!match) continue;
+        const segment = match[2];
+        const numbers = [...segment.matchAll(/(?:rs\.?|inr|₹)?\s*([0-9][0-9,]*(?:\.\d+)?)\s*(lpa|lac|lakhs?|cr|crore)?/gi)];
+        if (numbers.length !== 1 || /\d\s*%/.test(segment)) {
+          extracted[key] = 0;
+          extracted.warnings.push(`${key}: multiple amounts or a percentage found; enter the amount manually.`);
+          continue;
+        }
+        const periodText = `${match[1] || ""} ${segment}`;
+        const annual = /annual|yearly|per\s+(?:year|annum)|p\.?a\.?\b|lpa/i.test(periodText);
+        const monthly = /monthly|per\s+month|p\.?m\.?\b/i.test(periodText);
+        if (annual && monthly) {
+          extracted[key] = 0;
+          extracted.warnings.push(`${key}: both monthly and annual labels found; enter the amount manually.`);
+          continue;
+        }
+        let value = amountFromMatch(numbers[0][1], numbers[0][2]);
+        const targetAnnual = key === "ctc" || key === "variable";
+        if (annual && !targetAnnual) value /= 12;
+        if (monthly && targetAnnual) value *= 12;
+        if (!annual && !monthly) extracted.warnings.push(`${key}: assumed ${targetAnnual ? "annual" : "monthly"}; confirm this amount.`);
+        extracted[key] = roundRupee(value);
+      }
+      return extracted;
     }
 
     async function inflateZipEntry(bytes) {
@@ -2649,6 +2717,7 @@
 
         const method = view.getUint16(centralOffset + 10, true);
         const compressedSize = view.getUint32(centralOffset + 20, true);
+        const uncompressedSize = view.getUint32(centralOffset + 24, true);
         const fileNameLength = view.getUint16(centralOffset + 28, true);
         const extraLength = view.getUint16(centralOffset + 30, true);
         const commentLength = view.getUint16(centralOffset + 32, true);
@@ -2656,6 +2725,8 @@
         const entryName = decoder.decode(bytes.slice(centralOffset + 46, centralOffset + 46 + fileNameLength));
 
         if (entryName === "word/document.xml") {
+          if (uncompressedSize > 10 * 1024 * 1024) throw new Error("Document text is too large. Please use a smaller DOCX file.");
+          if (method !== 0 && method !== 8) throw new Error("This DOCX compression format is not supported.");
           const localNameLength = view.getUint16(localHeaderOffset + 26, true);
           const localExtraLength = view.getUint16(localHeaderOffset + 28, true);
           const dataStart = localHeaderOffset + 30 + localNameLength + localExtraLength;
@@ -2663,7 +2734,8 @@
           const documentBytes = method === 0 ? compressed : await inflateZipEntry(compressed);
           const xml = decoder.decode(documentBytes);
           const doc = new DOMParser().parseFromString(xml, "application/xml");
-          const textNodes = Array.from(doc.getElementsByTagName("w:t"));
+          if (doc.getElementsByTagName("parsererror").length) throw new Error("This Word document contains unreadable text.");
+          const textNodes = Array.from(doc.getElementsByTagNameNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main", "t"));
           return textNodes.map((node) => node.textContent).join(" ");
         }
 
@@ -2688,24 +2760,32 @@
       renderUploadedInfo(extracted, sourceFileName);
 
       mapping.forEach(([key, input]) => {
+        if (input) input.value = "";
         if (input && extracted[key] > 0) {
           input.value = plainIndianNumber(extracted[key]);
           appliedCount++;
         }
       });
+      fields.npsMonthly.value = "";
+      fields.otherTaxFreeMonthly.value = "";
+      fields.gratuityMentioned.value = "";
+      fields.stateTax.value = "";
+      fields.pfBasis.value = "";
+      fields.employerPfIncluded.value = "";
+      fields.variablePayType.value = "none";
 
       if (typeof extracted.gratuityMentioned === "boolean") {
         fields.gratuityMentioned.value = extracted.gratuityMentioned ? "true" : "false";
       }
 
       if (extracted.variable > 0) {
-        fields.variablePayType.value = "monthly";
+        fields.variablePayType.value = "annual";
       }
 
       if (extracted.state) {
         const normalizedState = extracted.state.toLowerCase() === "bangalore" ? "Karnataka" : extracted.state;
-        const stateOption = Array.from(fields.stateTax.options).find((option) => option.value === normalizedState);
-        fields.stateTax.value = stateOption ? normalizedState : "DEFAULT";
+        const stateOption = Array.from(fields.stateTax.options).find((option) => option.value.toLowerCase() === normalizedState.toLowerCase());
+        fields.stateTax.value = stateOption ? stateOption.value : "DEFAULT";
       }
 
       calculate();
@@ -2713,12 +2793,9 @@
     }
 
     async function extractFromUploadedFile(file, fileExtension) {
-      if (isPublicStaticPage) {
-        resetUploadedInfo("Public fast version: DOCX auto-read works in the desktop launcher. Enter or confirm values manually here.");
-        calculate();
-        return "Fast public version loaded. DOCX auto-read is available in the desktop CTC launcher; on this public page, enter or confirm salary values manually.";
-      }
-
+      if (fileExtension !== ".docx") throw new Error("Please upload a text-based DOCX file.");
+      if (file.size > 10 * 1024 * 1024) throw new Error("Please use a DOCX file smaller than 10 MB.");
+      if (!isPublicStaticPage && window.location.protocol !== "file:") {
       const formData = new FormData();
       formData.append("file", file);
 
@@ -2729,38 +2806,68 @@
         });
         const result = await response.json();
 
-        if (result.fields) {
-          applyExtractedFields(result.fields, file.name);
-        } else {
-          resetUploadedInfo("This upload was accepted, but no salary values were read from it. Enter or confirm the values manually on the left.");
-          calculate();
-        }
-
-        if (response.ok && result.ok) {
-          return result.message;
-        }
-
-        return result.message || "Could not read salary data from this file. Enter or confirm the values below, then calculate.";
+        if (result.fields) return result.fields;
       } catch (error) {
-        if (fileExtension !== ".docx") {
-          resetUploadedInfo("This file was uploaded, but auto-reading is only available for text-based DOCX files right now. Enter or confirm the values manually on the left.");
-          calculate();
-          return "File uploaded successfully. Auto-reading is available for text-based DOCX files when the local extraction server is running. For this file type, enter or confirm the salary values below.";
-        }
+        // Static hosts and offline files can read DOCX locally in the browser.
       }
-
+      }
       const text = await readDocxText(file);
-      const extracted = extractSalaryFields(text);
-      const appliedCount = applyExtractedFields(extracted, file.name);
-
-      if (appliedCount === 0) {
-        return "Word document uploaded, but I could not find CTC/basic/HRA style labels. Enter or confirm the values below, then the calculator will work.";
-      }
-
-      return `Word document read successfully. I filled ${appliedCount} salary field${appliedCount === 1 ? "" : "s"} and recalculated your in-hand salary.`;
+      return extractSalaryFields(text);
     }
 
+    const uploadReviewLabels = { ctc: "Annual CTC", basic: "Basic Monthly", hra: "HRA Monthly", grossMonthly: "Gross Monthly", variable: "Variable Pay Annual", conveyance: "Conveyance Monthly" };
+
+    function reviewUpload(extracted, name) {
+      pendingUpload = { extracted, name };
+      const container = document.getElementById("uploadReviewFields");
+      container.replaceChildren();
+      document.getElementById("uploadReviewFile").textContent = name;
+      document.getElementById("uploadReviewWarnings").textContent = (extracted.warnings || []).join(" ");
+      document.getElementById("uploadReviewError").textContent = "";
+      for (const [key, title] of Object.entries(uploadReviewLabels)) {
+        const label = document.createElement("label");
+        label.textContent = title;
+        const input = document.createElement("input");
+        input.id = `review-${key}`;
+        input.type = "text";
+        input.inputMode = "decimal";
+        input.placeholder = "Not found";
+        input.value = extracted[key] > 0 ? plainIndianNumber(extracted[key]) : "";
+        label.appendChild(input);
+        container.appendChild(label);
+      }
+      document.getElementById("uploadReviewDialog").showModal();
+      setUploadStatus("Review the amounts before applying them.");
+    }
+
+    document.getElementById("confirmUploadBtn").addEventListener("click", () => {
+      if (!pendingUpload) return;
+      const values = { ...pendingUpload.extracted };
+      for (const key of Object.keys(uploadReviewLabels)) {
+        const value = readNumber(document.getElementById(`review-${key}`));
+        if (!Number.isFinite(value)) {
+          document.getElementById("uploadReviewError").textContent = "Enter valid non-negative amounts before continuing.";
+          return;
+        }
+        values[key] = value;
+      }
+      applyExtractedFields(values, pendingUpload.name);
+      pendingUpload = null;
+      document.getElementById("uploadReviewDialog").close();
+      setUploadStatus("Confirmed amounts applied. Complete the remaining salary questions.");
+    });
+    const cancelUpload = () => {
+      pendingUpload = null;
+      document.getElementById("uploadReviewDialog").close();
+      setUploadStatus("Upload cancelled. Your current salary inputs were kept.");
+    };
+    document.getElementById("cancelUploadBtn").addEventListener("click", cancelUpload);
+    document.getElementById("uploadReviewDialog").addEventListener("cancel", cancelUpload);
+
     async function handleUploadedFile(file) {
+      const revision = ++uploadRevision;
+      pendingUpload = null;
+      if (document.getElementById("uploadReviewDialog").open) document.getElementById("uploadReviewDialog").close();
       clearUploadPreview();
 
       if (!file) {
@@ -2770,8 +2877,8 @@
 
       const fileExtension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
 
-      if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-        setUploadStatus("This file type is not supported. Please upload a JPG, PNG, WEBP, PDF, DOC, or DOCX.", true);
+      if (fileExtension !== ".docx") {
+        setUploadStatus("Please upload a text-based DOCX file.", true);
         return;
       }
 
@@ -2796,12 +2903,13 @@
       }
 
       uploadPreview.classList.add("show");
-      setUploadStatus("Reading file and calculating...");
+      setUploadStatus("Reading document...");
 
       try {
-        const message = await extractFromUploadedFile(file, fileExtension);
-        setUploadStatus(message);
+        const extracted = await extractFromUploadedFile(file, fileExtension);
+        if (revision === uploadRevision) reviewUpload(extracted, file.name);
       } catch (error) {
+        if (revision !== uploadRevision) return;
         calculate();
         setUploadStatus(error.message || "Could not read salary data from this file. Enter or confirm the values below, then calculate.", true);
       }
