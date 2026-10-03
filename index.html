@@ -1849,7 +1849,7 @@
     function employeePfForBasis(basic, basis) {
       if (!basis) return 0;
       if (basis === "zero") return 0;
-      if (basis === "capped") return 1800;
+      if (basis === "capped") return Math.min(basic * 0.12, 1800);
       return basic * 0.12;
     }
 
@@ -2384,18 +2384,17 @@
       const userEnteredGrossMonthly = readNumber(fields.grossMonthlyInput) > 0;
       const employerPfInsideCtcAnnual = fields.employerPfIncluded.value === "true" ? employeePfAnnual : 0;
       const fixedCtcDeductionsAnnual = employerPfInsideCtcAnnual + employerNpsAnnual + gratuityProvision;
+      const esiEligible = ctc > 0 && ctc / 24 <= 21000;
       let annualGross;
       let employerEsicMonthly = 0;
 
       if (userEnteredGrossMonthly) {
         annualGross = readNumber(fields.grossMonthlyInput) * 12;
         const enteredGrossMonthly = annualGross / 12;
-        employerEsicMonthly = enteredGrossMonthly < 21000 ? enteredGrossMonthly * 0.0325 : 0;
+        employerEsicMonthly = esiEligible ? enteredGrossMonthly * 0.0325 : 0;
       } else {
         const grossBeforeEmployerEsicAnnual = Math.max(0, ctc - fixedCtcDeductionsAnnual);
-        const grossBeforeEmployerEsicMonthly = grossBeforeEmployerEsicAnnual / 12;
-
-        if (grossBeforeEmployerEsicMonthly < 21000) {
+        if (esiEligible) {
           annualGross = grossBeforeEmployerEsicAnnual / 1.0325;
           employerEsicMonthly = (annualGross / 12) * 0.0325;
         } else {
@@ -2440,7 +2439,7 @@
       const cess = appliedTaxResult.cess;
       const taxAnnual = appliedTaxResult.annualTax;
       const tdsMonthly = taxAnnual / 12;
-      const esicMonthly = grossMonthlyForCalc < 21000 ? grossMonthlyForCalc * 0.0075 : 0;
+      const esicMonthly = esiEligible ? grossMonthlyForCalc * 0.0075 : 0;
       const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - employeeLwfMonthly - tdsMonthly - esicMonthly;
       const annualInHand = monthlyInHand * 12 + variableAnnual;
       const ctcMonthlyAssumption = ctc / 12;
