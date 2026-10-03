@@ -460,6 +460,13 @@
       color: var(--ink);
     }
 
+    .field-help {
+      color: #4b5563;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
     .optional-text {
       color: #64748b;
       font-weight: 700;
@@ -1040,13 +1047,22 @@
     }
 
     .tax-saving-flash {
-      color: #22c55e !important;
-      animation: taxSavingFlash 1.25s ease-in-out infinite;
+      color: #166534 !important;
     }
 
-    @keyframes taxSavingFlash {
-      0%, 42%, 100% { opacity: 1; }
-      62%, 78% { opacity: 0.22; }
+    .result-assumptions {
+      display: grid;
+      gap: 6px;
+      border-top: 1px solid #b6c8ce;
+      padding-top: 12px;
+      color: #374151;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .result-assumptions p {
+      margin: 0;
+      overflow-wrap: anywhere;
     }
 
     .main-result {
@@ -1262,7 +1278,7 @@
         <div class="panel-head">
           <div>
             <h2>Salary Data</h2>
-            <p class="muted">Use annual numbers in rupees.</p>
+            <p class="muted">Enter amounts in rupees. Follow the Annual or Monthly label for each field.</p>
           </div>
         </div>
         <div class="panel-body">
@@ -1291,7 +1307,7 @@
           </div>
 
           <div class="form-grid" id="salaryForm">
-            <label>Annual CTC *
+            <label>Annual CTC including STI (if any) *
               <input id="ctc" type="text" inputmode="numeric" placeholder="e.g. 18,00,000">
             </label>
             <label>Tax Regime *
@@ -1306,10 +1322,10 @@
               <span>Financial Year</span>
               <strong>FY 2026-27</strong>
             </div>
-            <label class="breakup-field">Gross Monthly
+            <label class="breakup-field">Monthly Gross
               <input id="grossMonthlyInput" type="text" inputmode="numeric" placeholder="e.g. 1,82,400">
             </label>
-            <label class="breakup-field">Conveyance Monthly
+            <label class="breakup-field">Monthly Conveyance
               <input id="conveyance" type="text" inputmode="numeric" placeholder="optional">
             </label>
             <label>Employment State *
@@ -1347,46 +1363,51 @@
               </select>
             </label>
             <label>Is gratuity part of CTC? *
-                  <select id="gratuityMentioned">
+                  <select id="gratuityMentioned" aria-describedby="gratuityHelp">
                     <option value="">Select yes or no</option>
                     <option value="true">Yes</option>
                     <option value="false">No</option>
                   </select>
+                  <span class="field-help" id="gratuityHelp">A gratuity provision included in CTC is not monthly take-home pay.</span>
                 </label>
             <label>PF Basis *
-                  <select id="pfBasis">
+                  <select id="pfBasis" aria-describedby="pfBasisHelp">
                     <option value="">Select PF basis</option>
                     <option value="actual">Actual basis: 12% of Basic</option>
-                    <option value="capped">Capped: Rs 1,800 monthly</option>
+                    <option value="capped">12% of Basic, up to Rs 1,800 monthly</option>
                     <option value="zero">Zero PF</option>
                   </select>
+                  <span class="field-help" id="pfBasisHelp">PF is your provident-fund contribution, deducted from take-home pay. Match the basis in your salary breakup.</span>
                 </label>
             <label>Is employer PF part of CTC? *
-              <select id="employerPfIncluded">
+              <select id="employerPfIncluded" aria-describedby="employerPfHelp">
                 <option value="">Select yes or no</option>
                 <option value="true">Yes</option>
                 <option value="false">No</option>
               </select>
+              <span class="field-help" id="employerPfHelp">Choose Yes if the company's PF contribution is included in your quoted CTC.</span>
             </label>
-            <label>Employer NPS Monthly <span class="optional-text">(optional)</span>
-              <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000">
+            <label>Monthly Employer NPS <span class="optional-text">(optional)</span>
+              <input id="npsMonthly" type="text" inputmode="numeric" placeholder="e.g. 5,000" aria-describedby="employerNpsHelp">
+              <span class="field-help" id="employerNpsHelp">The company's National Pension System contribution, separate from your personal NPS investment.</span>
             </label>
-            <label>One-time / Off-cycle / Variable Pay
+            <label>Is annual STI included in CTC?
                   <select id="variablePayType">
-                    <option value="none">No additional pay</option>
-                    <option value="annual">Enter annual payout</option>
+                    <option value="none">No STI included</option>
+                    <option value="annual">Enter annual STI</option>
                   </select>
                 </label>
             <details class="advanced-options">
               <summary>Advanced Options</summary>
               <div class="advanced-grid">
-                <label>Basic Monthly <span class="optional-text">(optional)</span>
+                <label>Monthly Basic <span class="optional-text">(optional)</span>
               <input id="basic" type="text" inputmode="numeric" placeholder="e.g. 75,000">
             </label>
-                <label>Annual One-time / Off-cycle / Variable Pay
-                  <input id="variable" type="text" inputmode="numeric" placeholder="fully taxable">
+                <label>Annual STI included in CTC (if any)
+                  <input id="variable" type="text" inputmode="numeric" placeholder="e.g. 3,00,000" aria-describedby="stiHelp">
+                  <span class="field-help" id="stiHelp">Enter the annual payout included in your CTC. STI is paid annually, excluded from regular monthly pay, and remains taxable.</span>
                 </label>
-                <label>Other Tax-Free Component Monthly <span class="optional-text">(optional · old regime only)</span>
+                <label>Monthly Other Tax-Free Component <span class="optional-text">(optional · old regime only)</span>
                   <input id="otherTaxFreeMonthly" type="text" inputmode="numeric" placeholder="e.g. 10,000">
                 </label>
               </div>
@@ -1426,10 +1447,10 @@
                   </select>
                 </label>
                 <div class="hra-fields" id="hraFields">
-                  <label>HRA Received Monthly *
+                  <label>Monthly HRA Received *
                     <input id="hra" type="text" inputmode="numeric" placeholder="e.g. 30,000">
                   </label>
-                  <label>Rent Paid Monthly *
+                  <label>Monthly Rent Paid *
                     <input id="rentPaidMonthly" type="text" inputmode="numeric" placeholder="e.g. 35,000">
                   </label>
                   <label>City Category *
@@ -1474,6 +1495,11 @@
             <span>Your Estimated Regular-Month In-Hand</span>
             <strong id="monthlyInHand">₹0</strong>
             <p class="result-note">Bonus, variable-pay and payroll-adjustment months may differ.</p>
+            <div class="result-assumptions">
+              <p id="resultRecurringCtc">Monthly CTC excluding annual STI: waiting for input.</p>
+              <p id="resultBasicAssumption">Basic: waiting for input.</p>
+              <p id="resultTdsAssumption">Monthly TDS: waiting for input.</p>
+            </div>
           </div>
 
           <span id="annualInHand" style="display:none;">₹0</span>
@@ -1490,9 +1516,9 @@
           </div>
 
           <div class="reality-check">
-            <h3>CTC ÷ 12 Myth Buster</h3>
+            <h3>CTC &amp; Take-Home Comparison</h3>
             <div class="reality-grid">
-              <div class="reality-card"><span>What you expect</span><strong id="ctcAssumption">₹0</strong></div>
+              <div class="reality-card"><span>Monthly CTC excluding annual STI</span><strong id="ctcAssumption">₹0</strong></div>
               <div class="reality-card"><span>What you get</span><strong id="realityActual">₹0</strong></div>
               <div class="reality-card"><span>Reality gap</span><strong id="realityDiff">₹0</strong></div>
             </div>
@@ -1519,10 +1545,10 @@
                 <div class="data-card"><span>CTC</span><strong id="uploadedCtc">Waiting for upload</strong></div>
                 <div class="data-card"><span>Basic</span><strong id="uploadedBasic">Waiting for upload</strong></div>
                 <div class="data-card"><span>HRA</span><strong id="uploadedHra">Waiting for upload</strong></div>
-                <div class="data-card"><span>Gross Monthly</span><strong id="uploadedGrossMonthly">Waiting for upload</strong></div>
-                <div class="data-card"><span>One-time / Off-cycle / Variable Pay</span><strong id="uploadedVariable">Waiting for input</strong></div>
-                <div class="data-card"><span>Employer NPS Monthly</span><strong id="uploadedNpsMonthly">Not provided</strong></div>
-                <div class="data-card"><span>Other Tax-Free Monthly</span><strong id="uploadedOtherTaxFreeMonthly">Not provided</strong></div>
+                <div class="data-card"><span>Monthly Gross</span><strong id="uploadedGrossMonthly">Waiting for upload</strong></div>
+                <div class="data-card"><span>Annual STI included in CTC (if any)</span><strong id="uploadedVariable">Waiting for input</strong></div>
+                <div class="data-card"><span>Monthly Employer NPS</span><strong id="uploadedNpsMonthly">Not provided</strong></div>
+                <div class="data-card"><span>Monthly Other Tax-Free Component</span><strong id="uploadedOtherTaxFreeMonthly">Not provided</strong></div>
                 <div class="data-card"><span>Gratuity</span><strong id="uploadedGratuity">Waiting for upload</strong></div>
                 <div class="data-card"><span>PF Basis</span><strong id="uploadedPfBasis">Waiting for upload</strong></div>
                 <div class="data-card"><span>Employer PF in CTC</span><strong id="uploadedEmployerPfIncluded">Waiting for input</strong></div>
@@ -1535,7 +1561,7 @@
               <div class="explanation" id="explanation"></div>
               <div class="summary-table">
               <div class="summary-row-item"><span>Tax regime used</span><strong id="summaryTaxRegime">Not selected</strong></div>
-              <div class="summary-row-item"><span>Annual CTC</span><strong id="summaryCtc">₹0</strong></div>
+              <div class="summary-row-item"><span>Annual CTC including STI (if any)</span><strong id="summaryCtc">₹0</strong></div>
               <div class="summary-row-item"><span>Employer PF included in CTC</span><strong id="summaryEmployerPfIncluded">Not selected</strong></div>
               <div class="summary-row-item"><span>Employer PF</span><strong id="summaryEmployerPfAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer NPS</span><strong id="summaryEmployerNpsAnnual">₹0</strong></div>
@@ -1544,7 +1570,7 @@
               <div class="summary-row-item"><span>Gratuity</span><strong id="summaryGratuityAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Employer ESIC</span><strong id="summaryEmployerEsicAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Gross annual salary</span><strong id="summaryGrossAnnual">₹0</strong></div>
-              <div class="summary-row-item"><span>One-time / off-cycle / variable pay</span><strong id="summaryVariableAnnual">₹0</strong></div>
+              <div class="summary-row-item"><span>Annual STI included in CTC (if any)</span><strong id="summaryVariableAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Maximum professional tax annual estimate</span><strong id="summaryProfessionalTaxAnnual">₹0</strong></div>
               <div class="summary-row-item"><span>Professional tax frequency</span><strong id="summaryPtFrequency">Not applicable</strong></div>
               <div class="summary-row-item"><span>Standard deduction</span><strong id="summaryStandardDeduction">₹75,000</strong></div>
@@ -1769,9 +1795,9 @@
       if (usesOldRegime && !fields.oldDeductionsChoice.value) missing.push("Additional old-regime deductions yes/no");
       if (usesOldRegime && hasAdditionalOldDeductions && !fields.claimHra.value) missing.push("HRA exemption yes/no");
       if (usesOldRegime && hasAdditionalOldDeductions && fields.claimHra.value === "true") {
-        if (readNumber(fields.basic) === 0) missing.push("Basic Monthly for HRA");
-        if (readNumber(fields.hra) === 0) missing.push("HRA Received Monthly");
-        if (readNumber(fields.rentPaidMonthly) === 0) missing.push("Rent Paid Monthly");
+        if (readNumber(fields.basic) === 0) missing.push("Monthly Basic for HRA");
+        if (readNumber(fields.hra) === 0) missing.push("Monthly HRA Received");
+        if (readNumber(fields.rentPaidMonthly) === 0) missing.push("Monthly Rent Paid");
         if (!fields.hraCityType.value) missing.push("HRA City Category");
       }
 
@@ -1867,7 +1893,7 @@
 
     function variablePayLabel(monthlyValue) {
       return fields.variablePayType.value === "none"
-        ? "No additional pay"
+        ? "No STI included"
         : `${money(monthlyValue * 12)} annual · fully taxable`;
     }
 
@@ -2249,6 +2275,9 @@
     }
 
     function setPendingCalculation(message) {
+      document.getElementById("resultRecurringCtc").textContent = "Monthly CTC excluding annual STI: waiting for input.";
+      document.getElementById("resultBasicAssumption").textContent = "Basic: waiting for input.";
+      document.getElementById("resultTdsAssumption").textContent = "Monthly TDS: waiting for input.";
       output.monthlyInHand.textContent = "₹0";
       output.annualInHand.textContent = "₹0";
       output.taxAnnual.textContent = "₹0";
@@ -2358,8 +2387,8 @@
       if (userEnteredBasic) {
         output.basicValidationNote.classList.toggle("flag", !basicPasses);
         output.basicValidationNote.textContent = basicPasses
-          ? "Basic check passed."
-          : `Flag: entered Basic ${money(annualBasic)} should be at least 50% of CTC (${money(basicThreshold)}). Verify Basic monthly or CTC.`;
+          ? "Basic meets the calculator's 50%-of-CTC assumption."
+          : `Entered Basic ${money(annualBasic)} annual is below this calculator's 50%-of-CTC assumption (${money(basicThreshold)}). Confirm the amount with your salary breakup.`;
       } else {
         output.basicValidationNote.classList.remove("flag");
         output.basicValidationNote.textContent = `Basic not entered, so it is assumed at 50% of CTC (${money(annualBasic)} annual).`;
@@ -2442,12 +2471,17 @@
       const esicMonthly = esiEligible ? grossMonthlyForCalc * 0.0075 : 0;
       const monthlyInHand = grossMonthlyForCalc - employeePfMonthly - professionalTaxMonthly - employeeLwfMonthly - tdsMonthly - esicMonthly;
       const annualInHand = monthlyInHand * 12 + variableAnnual;
-      const ctcMonthlyAssumption = ctc / 12;
+      const ctcMonthlyAssumption = Math.max(0, ctc - variableAnnual) / 12;
       const monthlyDifference = Math.max(0, ctcMonthlyAssumption - monthlyInHand);
       const tier = ctc < 1275000 ? "Tier 1" : "Tier 2";
       const price = tier === "Tier 1" ? 49 : 99;
 
       output.monthlyInHand.textContent = money(monthlyInHand);
+      document.getElementById("resultRecurringCtc").textContent = `Monthly CTC excluding annual STI: ${money(ctcMonthlyAssumption)}. Before employer contributions and payroll deductions.`;
+      document.getElementById("resultBasicAssumption").textContent = userEnteredBasic
+        ? `Basic used: ${money(basic)} per month, as entered.`
+        : `Basic assumed: ${money(basic)} per month (50% of annual CTC, divided by 12).`;
+      document.getElementById("resultTdsAssumption").textContent = `Average monthly TDS: ${money(tdsMonthly)} (annual tax divided by 12). Actual payroll deductions may vary.`;
       output.annualInHand.textContent = money(annualInHand);
       output.taxAnnual.textContent = money(taxAnnual);
       output.monthlyTax.textContent = money(tdsMonthly);
@@ -2814,7 +2848,7 @@
       return extractSalaryFields(text);
     }
 
-    const uploadReviewLabels = { ctc: "Annual CTC", basic: "Basic Monthly", hra: "HRA Monthly", grossMonthly: "Gross Monthly", variable: "Variable Pay Annual", conveyance: "Conveyance Monthly" };
+    const uploadReviewLabels = { ctc: "Annual CTC including STI (if any)", basic: "Monthly Basic", hra: "Monthly HRA", grossMonthly: "Monthly Gross", variable: "Annual STI included in CTC (if any)", conveyance: "Monthly Conveyance" };
 
     function reviewUpload(extracted, name) {
       pendingUpload = { extracted, name };
