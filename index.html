@@ -1807,7 +1807,7 @@
     function updateCalculateButtonState() {
       const missing = missingCompulsoryInputs();
       const ctc = readNumber(fields.ctc);
-      const invalid = getInputFlags(0, readNumber(fields.basic) || ctc * 0.5 / 12, ctc).filter(flag => flag.startsWith("Invalid"));
+      const invalid = getInputFlags(0, readNumber(fields.basic) || assumedMonthlyBasic(ctc), ctc).filter(flag => flag.startsWith("Invalid"));
       const isReady = missing.length === 0 && invalid.length === 0;
 
       calculateBtn.classList.toggle("ready", isReady);
@@ -1897,8 +1897,12 @@
         : `${money(monthlyValue * 12)} annual · fully taxable`;
     }
 
+    function assumedMonthlyBasic(ctc) {
+      return Math.max(0, ctc - variableMonthlyFromInput() * 12) * 0.5 / 12;
+    }
+
     function estimatedFromCtc(ctc, pfBasis = "", gratuityIncluded = "", employerPfIncluded = "", employerNpsMonthly = 0) {
-      const basic = ctc * 0.5 / 12;
+      const basic = assumedMonthlyBasic(ctc);
       const hra = basic * 0.5;
       const employerPfMonthly = employeePfForBasis(basic, pfBasis);
       const employerPfAnnual = employerPfMonthly * 12;
@@ -2380,18 +2384,18 @@
         output.inputErrorBox.textContent = "";
       }
       const annualBasic = basic * 12;
-      const basicThreshold = ctc * 0.5;
+      const basicThreshold = assumedMonthlyBasic(ctc) * 12;
       const basicPasses = ctc > 0 && annualBasic >= basicThreshold;
       const userEnteredBasic = readNumber(fields.basic) > 0;
 
       if (userEnteredBasic) {
         output.basicValidationNote.classList.toggle("flag", !basicPasses);
         output.basicValidationNote.textContent = basicPasses
-          ? "Basic meets the calculator's 50%-of-CTC assumption."
-          : `Entered Basic ${money(annualBasic)} annual is below this calculator's 50%-of-CTC assumption (${money(basicThreshold)}). Confirm the amount with your salary breakup.`;
+          ? "Basic meets the calculator's 50%-of-CTC-excluding-STI assumption."
+          : `Entered Basic ${money(annualBasic)} annual is below this calculator's 50%-of-CTC-excluding-STI assumption (${money(basicThreshold)}). Confirm the amount with your salary breakup.`;
       } else {
         output.basicValidationNote.classList.remove("flag");
-        output.basicValidationNote.textContent = `Basic not entered, so it is assumed at 50% of CTC (${money(annualBasic)} annual).`;
+        output.basicValidationNote.textContent = `Basic not entered, so it is assumed at 50% of CTC excluding annual STI (${money(annualBasic)} annual).`;
       }
 
       output.uploadReadNote.classList.toggle("flag", inputFlags.length > 0);
@@ -2480,7 +2484,7 @@
       document.getElementById("resultRecurringCtc").textContent = `Monthly CTC excluding annual STI: ${money(ctcMonthlyAssumption)}. Before employer contributions and payroll deductions.`;
       document.getElementById("resultBasicAssumption").textContent = userEnteredBasic
         ? `Basic used: ${money(basic)} per month, as entered.`
-        : `Basic assumed: ${money(basic)} per month (50% of annual CTC, divided by 12).`;
+        : `Basic assumed: ${money(basic)} per month (50% of annual CTC after removing annual STI, divided by 12).`;
       document.getElementById("resultTdsAssumption").textContent = `Average monthly TDS: ${money(tdsMonthly)} (annual tax divided by 12). Actual payroll deductions may vary.`;
       output.annualInHand.textContent = money(annualInHand);
       output.taxAnnual.textContent = money(taxAnnual);
