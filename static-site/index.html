@@ -2417,7 +2417,7 @@
       const userEnteredGrossMonthly = readNumber(fields.grossMonthlyInput) > 0;
       const employerPfInsideCtcAnnual = fields.employerPfIncluded.value === "true" ? employeePfAnnual : 0;
       const fixedCtcDeductionsAnnual = employerPfInsideCtcAnnual + employerNpsAnnual + gratuityProvision;
-      const esiEligible = ctc > 0 && ctc / 24 <= 21000;
+      const esiEligible = ctc > 0 && assumedMonthlyBasic(ctc) <= 21000;
       let annualGross;
       let employerEsicMonthly = 0;
 
